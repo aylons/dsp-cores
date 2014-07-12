@@ -4,5 +4,14 @@ modules = { "local" : [
 			"position_calc",
 			"wb_position_calc",
 			"wb_un_cross",
-            "sw_windowing"
-                      ] };
+            "sw_windowing",
+			"multiplier",
+			"cic",
+			"cordic",
+			"divider",
+			"fixed_dds",
+			"mixer",
+			"downconv",
+			"delta_sigma",
+			"position_nosysgen"
+         ] };
