@@ -908,11 +908,173 @@ begin
   adc_ch2_pos_calc <= adc_ch2_cond when wdw_use_en = '1' else adc_ch2_sp;
   adc_ch3_pos_calc <= adc_ch3_cond when wdw_use_en = '1' else adc_ch3_sp;
 
-  cmp_position_calc: position_calc
-  generic map
-  (
-    g_pipeline_regs                         => c_num_pipeline_regs
-  )
+  -----cmp_position_calc: position_calc
+  -----generic map
+  -----(
+  -----  g_pipeline_regs                         => c_num_pipeline_regs
+  -----)
+  -----port map
+  -----(
+  -----  adc_ch0_i                               => adc_ch0_pos_calc,
+  -----  adc_ch1_i                               => adc_ch1_pos_calc,
+  -----  adc_ch2_i                               => adc_ch2_pos_calc,
+  -----  adc_ch3_i                               => adc_ch3_pos_calc,
+
+  -----  clk                                     => fs_clk2x_i,
+  -----  clr                                     => sys_clr2x,
+
+  -----  del_sig_div_fofb_thres_i                => regs_out.ds_tbt_thres_val_o,
+  -----  del_sig_div_monit_thres_i               => regs_out.ds_fofb_thres_val_o,
+  -----  del_sig_div_tbt_thres_i                 => regs_out.ds_monit_thres_val_o,
+
+  -----  ksum_i                                  => regs_out.ksum_val_o,
+  -----  kx_i                                    => regs_out.kx_val_o,
+  -----  ky_i                                    => regs_out.ky_val_o,
+
+  -----  dds_config_valid_ch0_i                  => regs_out.dds_cfg_valid_ch0_o,
+  -----  dds_config_valid_ch1_i                  => regs_out.dds_cfg_valid_ch1_o,
+  -----  dds_config_valid_ch2_i                  => regs_out.dds_cfg_valid_ch2_o,
+  -----  dds_config_valid_ch3_i                  => regs_out.dds_cfg_valid_ch3_o,
+  -----  dds_pinc_ch0_i                          => regs_out.dds_pinc_ch0_val_o,
+  -----  dds_pinc_ch1_i                          => regs_out.dds_pinc_ch1_val_o,
+  -----  dds_pinc_ch2_i                          => regs_out.dds_pinc_ch2_val_o,
+  -----  dds_pinc_ch3_i                          => regs_out.dds_pinc_ch3_val_o,
+  -----  dds_poff_ch0_i                          => regs_out.dds_poff_ch0_val_o,
+  -----  dds_poff_ch1_i                          => regs_out.dds_poff_ch1_val_o,
+  -----  dds_poff_ch2_i                          => regs_out.dds_poff_ch2_val_o,
+  -----  dds_poff_ch3_i                          => regs_out.dds_poff_ch3_val_o,
+
+  -----  --adc_ch0_dbg_data_o                      => adc_ch0_dbg_data_o,
+  -----  --adc_ch1_dbg_data_o                      => adc_ch1_dbg_data_o,
+  -----  --adc_ch2_dbg_data_o                      => adc_ch2_dbg_data_o,
+  -----  --adc_ch3_dbg_data_o                      => adc_ch3_dbg_data_o,
+  -----  adc_ch0_dbg_data_o                      => open,
+  -----  adc_ch1_dbg_data_o                      => open,
+  -----  adc_ch2_dbg_data_o                      => open,
+  -----  adc_ch3_dbg_data_o                      => open,
+
+  -----  bpf_ch0_o                               => bpf_ch0,
+  -----  bpf_ch1_o                               => bpf_ch1,
+  -----  bpf_ch2_o                               => bpf_ch2,
+  -----  bpf_ch3_o                               => bpf_ch3,
+
+  -----  mix_ch0_i_o                             => mix_ch0_i,
+  -----  mix_ch0_q_o                             => mix_ch0_q,
+  -----  mix_ch1_i_o                             => mix_ch1_i,
+  -----  mix_ch1_q_o                             => mix_ch1_q,
+  -----  mix_ch2_i_o                             => mix_ch2_i,
+  -----  mix_ch2_q_o                             => mix_ch2_q,
+  -----  mix_ch3_i_o                             => mix_ch3_i,
+  -----  mix_ch3_q_o                             => mix_ch3_q,
+
+  -----  tbt_decim_ch0_i_o                       => tbt_decim_ch0_i,
+  -----  tbt_decim_ch0_q_o                       => tbt_decim_ch0_q,
+  -----  tbt_decim_ch1_i_o                       => tbt_decim_ch1_i,
+  -----  tbt_decim_ch1_q_o                       => tbt_decim_ch1_q,
+  -----  tbt_decim_ch2_i_o                       => tbt_decim_ch2_i,
+  -----  tbt_decim_ch2_q_o                       => tbt_decim_ch2_q,
+  -----  tbt_decim_ch3_i_o                       => tbt_decim_ch3_i,
+  -----  tbt_decim_ch3_q_o                       => tbt_decim_ch3_q,
+
+  -----  tbt_decim_q_ch01_incorrect_o            => tbt_decim_q_ch01_incorrect_int,
+  -----  tbt_decim_q_ch23_incorrect_o            => tbt_decim_q_ch23_incorrect_int,
+
+  -----  tbt_amp_ch0_o                           => tbt_amp_ch0,
+  -----  tbt_amp_ch1_o                           => tbt_amp_ch1,
+  -----  tbt_amp_ch2_o                           => tbt_amp_ch2,
+  -----  tbt_amp_ch3_o                           => tbt_amp_ch3,
+
+  -----  tbt_pha_ch0_o                           => tbt_pha_ch0,
+  -----  tbt_pha_ch1_o                           => tbt_pha_ch1,
+  -----  tbt_pha_ch2_o                           => tbt_pha_ch2,
+  -----  tbt_pha_ch3_o                           => tbt_pha_ch3,
+
+  -----  fofb_decim_ch0_i_o                      => fofb_decim_ch0_i,
+  -----  fofb_decim_ch0_q_o                      => fofb_decim_ch0_q,
+  -----  fofb_decim_ch1_i_o                      => fofb_decim_ch1_i,
+  -----  fofb_decim_ch1_q_o                      => fofb_decim_ch1_q,
+  -----  fofb_decim_ch2_i_o                      => fofb_decim_ch2_i,
+  -----  fofb_decim_ch2_q_o                      => fofb_decim_ch2_q,
+  -----  fofb_decim_ch3_i_o                      => fofb_decim_ch3_i,
+  -----  fofb_decim_ch3_q_o                      => fofb_decim_ch3_q,
+
+  -----  fofb_decim_q_01_missing_o               => fofb_decim_q_ch01_missing_int,
+  -----  fofb_decim_q_23_missing_o               => fofb_decim_q_ch23_missing_int,
+
+  -----  fofb_amp_ch0_o                          => fofb_amp_ch0,
+  -----  fofb_amp_ch1_o                          => fofb_amp_ch1,
+  -----  fofb_amp_ch2_o                          => fofb_amp_ch2,
+  -----  fofb_amp_ch3_o                          => fofb_amp_ch3,
+
+  -----  fofb_pha_ch0_o                          => fofb_pha_ch0,
+  -----  fofb_pha_ch1_o                          => fofb_pha_ch1,
+  -----  fofb_pha_ch2_o                          => fofb_pha_ch2,
+  -----  fofb_pha_ch3_o                          => fofb_pha_ch3,
+
+  -----  monit_amp_ch0_o                         => monit_amp_ch0,
+  -----  monit_amp_ch1_o                         => monit_amp_ch1,
+  -----  monit_amp_ch2_o                         => monit_amp_ch2,
+  -----  monit_amp_ch3_o                         => monit_amp_ch3,
+
+  -----  monit_cic_unexpected_o                  => monit_cic_unexpected_int,
+  -----  monit_cfir_incorrect_o                  => monit_cfir_incorrect_int,
+  -----  monit_pfir_incorrect_o                  => monit_pfir_incorrect_int,
+
+  -----  x_tbt_o                                 => x_tbt,
+  -----  x_tbt_valid_o                           => x_tbt_valid,
+  -----  y_tbt_o                                 => y_tbt,
+  -----  y_tbt_valid_o                           => y_tbt_valid,   -- will be removed soon
+  -----  q_tbt_o                                 => q_tbt,
+  -----  q_tbt_valid_o                           => q_tbt_valid,   -- will be removed soon
+  -----  sum_tbt_o                               => sum_tbt,
+  -----  sum_tbt_valid_o                         => sum_tbt_valid, -- will be removed soon
+
+  -----  x_fofb_o                                => x_fofb,
+  -----  x_fofb_valid_o                          => x_fofb_valid,
+  -----  y_fofb_o                                => y_fofb,
+  -----  y_fofb_valid_o                          => y_fofb_valid,  -- will be removed soon
+  -----  q_fofb_o                                => q_fofb,
+  -----  q_fofb_valid_o                          => q_fofb_valid,  -- will be removed soon
+  -----  sum_fofb_o                              => sum_fofb,
+  -----  sum_fofb_valid_o                        => sum_fofb_valid,-- will be removed soon
+
+  -----  x_monit_o                               => x_monit,
+  -----  x_monit_valid_o                         => x_monit_valid,
+  -----  y_monit_o                               => y_monit,
+  -----  y_monit_valid_o                         => y_monit_valid,   -- will be removed soon
+  -----  q_monit_o                               => q_monit,
+  -----  q_monit_valid_o                         => q_monit_valid,   -- will be removed soon
+  -----  sum_monit_o                             => sum_monit,
+  -----  sum_monit_valid_o                       => sum_monit_valid, -- will be removed soon
+
+  -----  x_monit_1_o                             => x_monit_1,
+  -----  x_monit_1_valid_o                       => x_monit_1_valid,
+  -----  y_monit_1_o                             => y_monit_1,
+  -----  y_monit_1_valid_o                       => y_monit_1_valid,  -- will be removed soon
+  -----  q_monit_1_o                             => q_monit_1,
+  -----  q_monit_1_valid_o                       => q_monit_1_valid,  -- will be removed soon
+  -----  sum_monit_1_o                           => sum_monit_1,
+  -----  sum_monit_1_valid_o                     => sum_monit_1_valid,-- will be removed soon
+
+  -----  monit_pos_1_incorrect_o                 => monit_pos_1_incorrect_int,
+
+  -----  -- Clock drivers for various rates
+  -----  clk_ce_1_o                              => clk_ce_1,
+  -----  clk_ce_1112_o                           => clk_ce_1112,
+  -----  clk_ce_1390000_o                        => clk_ce_1390000,
+  -----  clk_ce_2_o                              => clk_ce_2,
+  -----  clk_ce_2224_o                           => clk_ce_2224,
+  -----  clk_ce_22240000_o                       => clk_ce_22240000,
+  -----  clk_ce_222400000_o                      => clk_ce_222400000,
+  -----  clk_ce_2780000_o                        => clk_ce_2780000,
+  -----  clk_ce_35_o                             => clk_ce_35,
+  -----  clk_ce_5000_o                           => clk_ce_5000,
+  -----  clk_ce_556_o                            => clk_ce_556,
+  -----  clk_ce_5560000_o                        => clk_ce_5560000,
+  -----  clk_ce_70_o                             => clk_ce_70
+  -----);
+
+  cmp_position_calc: position_nosysgen
   port map
   (
     adc_ch0_i                               => adc_ch0_pos_calc,
@@ -927,9 +1089,9 @@ begin
     del_sig_div_monit_thres_i               => regs_out.ds_fofb_thres_val_o,
     del_sig_div_tbt_thres_i                 => regs_out.ds_monit_thres_val_o,
 
-    ksum_i                                  => regs_out.ksum_val_o,
-    kx_i                                    => regs_out.kx_val_o,
-    ky_i                                    => regs_out.ky_val_o,
+    ksum_i                                  => regs_out.ksum_val_o(23 downto 0),
+    kx_i                                    => regs_out.kx_val_o(23 downto 0),
+    ky_i                                    => regs_out.ky_val_o(23 downto 0),
 
     dds_config_valid_ch0_i                  => regs_out.dds_cfg_valid_ch0_o,
     dds_config_valid_ch1_i                  => regs_out.dds_cfg_valid_ch1_o,
@@ -967,166 +1129,217 @@ begin
     mix_ch3_i_o                             => mix_ch3_i,
     mix_ch3_q_o                             => mix_ch3_q,
 
-    tbt_decim_ch0_i_o                       => tbt_decim_ch0_i,
-    tbt_decim_ch0_q_o                       => tbt_decim_ch0_q,
-    tbt_decim_ch1_i_o                       => tbt_decim_ch1_i,
-    tbt_decim_ch1_q_o                       => tbt_decim_ch1_q,
-    tbt_decim_ch2_i_o                       => tbt_decim_ch2_i,
-    tbt_decim_ch2_q_o                       => tbt_decim_ch2_q,
-    tbt_decim_ch3_i_o                       => tbt_decim_ch3_i,
-    tbt_decim_ch3_q_o                       => tbt_decim_ch3_q,
+    tbt_decim_ch0_i_o(31 downto 24)                       => open,
+    tbt_decim_ch0_i_o(23 downto 0)                       => tbt_decim_ch0_i,
+    tbt_decim_ch0_q_o(31 downto 24)                       => open,
+    tbt_decim_ch0_q_o(23 downto 0)                       => tbt_decim_ch0_q,
+    tbt_decim_ch1_i_o(31 downto 24)                       => open,
+    tbt_decim_ch1_i_o(23 downto 0)                       => tbt_decim_ch1_i,
+    tbt_decim_ch1_q_o(31 downto 24)                       => open,
+    tbt_decim_ch1_q_o(23 downto 0)                       => tbt_decim_ch1_q,
+    tbt_decim_ch2_i_o(31 downto 24)                       => open,
+    tbt_decim_ch2_i_o(23 downto 0)                       => tbt_decim_ch2_i,
+    tbt_decim_ch2_q_o(31 downto 24)                       => open,
+    tbt_decim_ch2_q_o(23 downto 0)                       => tbt_decim_ch2_q,
+    tbt_decim_ch3_i_o(31 downto 24)                       => open,
+    tbt_decim_ch3_i_o(23 downto 0)                       => tbt_decim_ch3_i,
+    tbt_decim_ch3_q_o(31 downto 24)                       => open,
+    tbt_decim_ch3_q_o(23 downto 0)                       => tbt_decim_ch3_q,
 
     tbt_decim_q_ch01_incorrect_o            => tbt_decim_q_ch01_incorrect_int,
     tbt_decim_q_ch23_incorrect_o            => tbt_decim_q_ch23_incorrect_int,
 
-    tbt_amp_ch0_o                           => tbt_amp_ch0,
-    tbt_amp_ch1_o                           => tbt_amp_ch1,
-    tbt_amp_ch2_o                           => tbt_amp_ch2,
-    tbt_amp_ch3_o                           => tbt_amp_ch3,
+    tbt_amp_ch0_o(31 downto 24)                           => open, 
+    tbt_amp_ch0_o(23 downto 0)                           => tbt_amp_ch0,
+    tbt_amp_ch1_o(31 downto 24)                           => open, 
+    tbt_amp_ch1_o(23 downto 0)                           => tbt_amp_ch1,
+    tbt_amp_ch2_o(31 downto 24)                           => open, 
+    tbt_amp_ch2_o(23 downto 0)                           => tbt_amp_ch2,
+    tbt_amp_ch3_o(31 downto 24)                           => open, 
+    tbt_amp_ch3_o(23 downto 0)                           => tbt_amp_ch3,
 
-    tbt_pha_ch0_o                           => tbt_pha_ch0,
-    tbt_pha_ch1_o                           => tbt_pha_ch1,
-    tbt_pha_ch2_o                           => tbt_pha_ch2,
-    tbt_pha_ch3_o                           => tbt_pha_ch3,
+    tbt_pha_ch0_o(31 downto 24)                           => open, 
+    tbt_pha_ch0_o(23 downto 0)                           => tbt_pha_ch0,
+    tbt_pha_ch1_o(31 downto 24)                           => open, 
+    tbt_pha_ch1_o(23 downto 0)                           => tbt_pha_ch1,
+    tbt_pha_ch2_o(31 downto 24)                           => open, 
+    tbt_pha_ch2_o(23 downto 0)                           => tbt_pha_ch2,
+    tbt_pha_ch3_o(31 downto 24)                           => open, 
+    tbt_pha_ch3_o(23 downto 0)                           => tbt_pha_ch3,
 
-    fofb_decim_ch0_i_o                      => fofb_decim_ch0_i,
-    fofb_decim_ch0_q_o                      => fofb_decim_ch0_q,
-    fofb_decim_ch1_i_o                      => fofb_decim_ch1_i,
-    fofb_decim_ch1_q_o                      => fofb_decim_ch1_q,
-    fofb_decim_ch2_i_o                      => fofb_decim_ch2_i,
-    fofb_decim_ch2_q_o                      => fofb_decim_ch2_q,
-    fofb_decim_ch3_i_o                      => fofb_decim_ch3_i,
-    fofb_decim_ch3_q_o                      => fofb_decim_ch3_q,
+    fofb_decim_ch0_i_o(31 downto 24)                       => open,
+    fofb_decim_ch0_i_o(23 downto 0)                      => fofb_decim_ch0_i,
+    fofb_decim_ch0_q_o(31 downto 24)                       => open,
+    fofb_decim_ch0_q_o(23 downto 0)                      => fofb_decim_ch0_q,
+    fofb_decim_ch1_i_o(31 downto 24)                       => open,
+    fofb_decim_ch1_i_o(23 downto 0)                      => fofb_decim_ch1_i,
+    fofb_decim_ch1_q_o(31 downto 24)                       => open,
+    fofb_decim_ch1_q_o(23 downto 0)                      => fofb_decim_ch1_q,
+    fofb_decim_ch2_i_o(31 downto 24)                       => open,
+    fofb_decim_ch2_i_o(23 downto 0)                      => fofb_decim_ch2_i,
+    fofb_decim_ch2_q_o(31 downto 24)                       => open,
+    fofb_decim_ch2_q_o(23 downto 0)                      => fofb_decim_ch2_q,
+    fofb_decim_ch3_i_o(31 downto 24)                       => open,
+    fofb_decim_ch3_i_o(23 downto 0)                      => fofb_decim_ch3_i,
+    fofb_decim_ch3_q_o(31 downto 24)                       => open,
+    fofb_decim_ch3_q_o(23 downto 0)                      => fofb_decim_ch3_q,
 
     fofb_decim_q_01_missing_o               => fofb_decim_q_ch01_missing_int,
     fofb_decim_q_23_missing_o               => fofb_decim_q_ch23_missing_int,
 
-    fofb_amp_ch0_o                          => fofb_amp_ch0,
-    fofb_amp_ch1_o                          => fofb_amp_ch1,
-    fofb_amp_ch2_o                          => fofb_amp_ch2,
-    fofb_amp_ch3_o                          => fofb_amp_ch3,
+    fofb_amp_ch0_o(31 downto 24)                           => open, 
+    fofb_amp_ch0_o (23 downto 0)                        => fofb_amp_ch0,
+    fofb_amp_ch1_o(31 downto 24)                           => open, 
+    fofb_amp_ch1_o (23 downto 0)                        => fofb_amp_ch1,
+    fofb_amp_ch2_o(31 downto 24)                           => open, 
+    fofb_amp_ch2_o (23 downto 0)                        => fofb_amp_ch2,
+    fofb_amp_ch3_o(31 downto 24)                           => open, 
+    fofb_amp_ch3_o (23 downto 0)                        => fofb_amp_ch3,
 
-    fofb_pha_ch0_o                          => fofb_pha_ch0,
-    fofb_pha_ch1_o                          => fofb_pha_ch1,
-    fofb_pha_ch2_o                          => fofb_pha_ch2,
-    fofb_pha_ch3_o                          => fofb_pha_ch3,
+    fofb_pha_ch0_o(31 downto 24)                           => open, 
+    fofb_pha_ch0_o (23 downto 0)                        => fofb_pha_ch0,
+    fofb_pha_ch1_o(31 downto 24)                           => open, 
+    fofb_pha_ch1_o (23 downto 0)                        => fofb_pha_ch1,
+    fofb_pha_ch2_o(31 downto 24)                           => open, 
+    fofb_pha_ch2_o (23 downto 0)                        => fofb_pha_ch2,
+    fofb_pha_ch3_o(31 downto 24)                           => open, 
+    fofb_pha_ch3_o (23 downto 0)                        => fofb_pha_ch3,
 
-    monit_amp_ch0_o                         => monit_amp_ch0,
-    monit_amp_ch1_o                         => monit_amp_ch1,
-    monit_amp_ch2_o                         => monit_amp_ch2,
-    monit_amp_ch3_o                         => monit_amp_ch3,
+    monit_amp_ch0_o(31 downto 24)                           => open, 
+    monit_amp_ch0_o(23 downto 0)                         => monit_amp_ch0,
+    monit_amp_ch1_o(31 downto 24)                           => open, 
+    monit_amp_ch1_o(23 downto 0)                         => monit_amp_ch1,
+    monit_amp_ch2_o(31 downto 24)                           => open, 
+    monit_amp_ch2_o(23 downto 0)                         => monit_amp_ch2,
+    monit_amp_ch3_o(31 downto 24)                           => open, 
+    monit_amp_ch3_o(23 downto 0)                         => monit_amp_ch3,
 
     monit_cic_unexpected_o                  => monit_cic_unexpected_int,
     monit_cfir_incorrect_o                  => monit_cfir_incorrect_int,
     monit_pfir_incorrect_o                  => monit_pfir_incorrect_int,
 
-    x_tbt_o                                 => x_tbt,
+    x_tbt_o    (31 downto 26)                             => open,
+    x_tbt_o    (25 downto 0)                             => x_tbt,
+    y_tbt_o    (31 downto 26)                             => open,
+    y_tbt_o    (25 downto 0)                             => y_tbt,
+    q_tbt_o    (31 downto 26)                             => open,
+    q_tbt_o    (25 downto 0)                             => q_tbt,
+    sum_tbt_o    (31 downto 26)                             => open,
+    sum_tbt_o  (25 downto 0)                             => sum_tbt,
     x_tbt_valid_o                           => x_tbt_valid,
-    y_tbt_o                                 => y_tbt,
     y_tbt_valid_o                           => y_tbt_valid,   -- will be removed soon
-    q_tbt_o                                 => q_tbt,
     q_tbt_valid_o                           => q_tbt_valid,   -- will be removed soon
-    sum_tbt_o                               => sum_tbt,
     sum_tbt_valid_o                         => sum_tbt_valid, -- will be removed soon
 
-    x_fofb_o                                => x_fofb,
+    x_fofb_o    (31 downto 26)                             => open,
+    x_fofb_o   (25 downto 0)                             => x_fofb,
+    y_fofb_o    (31 downto 26)                             => open,
+    y_fofb_o   (25 downto 0)                             => y_fofb,
+    q_fofb_o    (31 downto 26)                             => open,
+    q_fofb_o   (25 downto 0)                             => q_fofb,
+    sum_fofb_o    (31 downto 26)                             => open,
+    sum_fofb_o (25 downto 0)                             => sum_fofb,
     x_fofb_valid_o                          => x_fofb_valid,
-    y_fofb_o                                => y_fofb,
     y_fofb_valid_o                          => y_fofb_valid,  -- will be removed soon
-    q_fofb_o                                => q_fofb,
     q_fofb_valid_o                          => q_fofb_valid,  -- will be removed soon
-    sum_fofb_o                              => sum_fofb,
     sum_fofb_valid_o                        => sum_fofb_valid,-- will be removed soon
 
-    x_monit_o                               => x_monit,
+    x_monit_o    (31 downto 26)                             => open,
+    x_monit_o   (25 downto 0)                            => x_monit,
+    y_monit_o    (31 downto 26)                             => open,
+    y_monit_o   (25 downto 0)                            => y_monit,
+    q_monit_o    (31 downto 26)                             => open,
+    q_monit_o   (25 downto 0)                            => q_monit,
+    sum_monit_o    (31 downto 26)                             => open,
+    sum_monit_o (25 downto 0)                            => sum_monit,
     x_monit_valid_o                         => x_monit_valid,
-    y_monit_o                               => y_monit,
     y_monit_valid_o                         => y_monit_valid,   -- will be removed soon
-    q_monit_o                               => q_monit,
     q_monit_valid_o                         => q_monit_valid,   -- will be removed soon
-    sum_monit_o                             => sum_monit,
     sum_monit_valid_o                       => sum_monit_valid, -- will be removed soon
 
-    x_monit_1_o                             => x_monit_1,
-    x_monit_1_valid_o                       => x_monit_1_valid,
-    y_monit_1_o                             => y_monit_1,
-    y_monit_1_valid_o                       => y_monit_1_valid,  -- will be removed soon
-    q_monit_1_o                             => q_monit_1,
-    q_monit_1_valid_o                       => q_monit_1_valid,  -- will be removed soon
-    sum_monit_1_o                           => sum_monit_1,
-    sum_monit_1_valid_o                     => sum_monit_1_valid,-- will be removed soon
+    --------x_monit_1_o                             => x_monit_1,
+    --------x_monit_1_valid_o                       => x_monit_1_valid,
+    --------y_monit_1_o                             => y_monit_1,
+    --------y_monit_1_valid_o                       => y_monit_1_valid,  -- will be removed soon
+    --------q_monit_1_o                             => q_monit_1,
+    --------q_monit_1_valid_o                       => q_monit_1_valid,  -- will be removed soon
+    --------sum_monit_1_o                           => sum_monit_1,
+    --------sum_monit_1_valid_o                     => sum_monit_1_valid,-- will be removed soon
 
-    monit_pos_1_incorrect_o                 => monit_pos_1_incorrect_int,
+    --------monit_pos_1_incorrect_o                 => monit_pos_1_incorrect_int,
 
     -- Clock drivers for various rates
     clk_ce_1_o                              => clk_ce_1,
-    clk_ce_1112_o                           => clk_ce_1112,
-    clk_ce_1390000_o                        => clk_ce_1390000,
     clk_ce_2_o                              => clk_ce_2,
-    clk_ce_2224_o                           => clk_ce_2224,
-    clk_ce_22240000_o                       => clk_ce_22240000,
-    clk_ce_222400000_o                      => clk_ce_222400000,
-    clk_ce_2780000_o                        => clk_ce_2780000,
-    clk_ce_35_o                             => clk_ce_35,
-    clk_ce_5000_o                           => clk_ce_5000,
-    clk_ce_556_o                            => clk_ce_556,
-    clk_ce_5560000_o                        => clk_ce_5560000,
-    clk_ce_70_o                             => clk_ce_70
+    clk_ce_tbt_o                            => clk_ce_70,
+    clk_ce_fofb_o                           => clk_ce_2224,
+    clk_ce_monit_o                          => clk_ce_22240000
+    --clk_ce_70_o                             => clk_ce_70
+    --clk_ce_2224_o                           => clk_ce_2224,
+    --clk_ce_22240000_o                       => clk_ce_22240000
+    --clk_ce_1112_o                           => clk_ce_1112,
+    --clk_ce_1390000_o                        => clk_ce_1390000,
+    --clk_ce_222400000_o                      => clk_ce_222400000,
+    --clk_ce_2780000_o                        => clk_ce_2780000,
+    --clk_ce_35_o                             => clk_ce_35,
+    --clk_ce_5000_o                           => clk_ce_5000,
+    --clk_ce_556_o                            => clk_ce_556,
+    --clk_ce_5560000_o                        => clk_ce_5560000,
   );
 
   --------------------------------------------------------------------------
   --                            Missing CE                                --
   --------------------------------------------------------------------------
   -- Generate missing clk_ce_11120000
-  cmp_xlclockdriver_clk_ce_11120000 : xlclockdriver
-    generic map (
-      log_2_period => 24,
-      period => 11200000, -- FIXME: Change CE net name to the correct ones! This is just to avoid changing the interface
-      pipeline_regs => c_num_pipeline_regs,
-      use_bufg => 0
-    )
-    port map (
-      sysce => '1',
-      sysclk => fs_clk2x_i,
-      sysclr => sys_clr2x,
-      ce => clk_ce_11120000_int,
-      clk => open
-    );
+  --cmp_xlclockdriver_clk_ce_11120000 : xlclockdriver
+  --  generic map (
+  --    log_2_period => 24,
+  --    period => 11200000, -- FIXME: Change CE net name to the correct ones! This is just to avoid changing the interface
+  --    pipeline_regs => c_num_pipeline_regs,
+  --    use_bufg => 0
+  --  )
+  --  port map (
+  --    sysce => '1',
+  --    sysclk => fs_clk2x_i,
+  --    sysclr => sys_clr2x,
+  --    ce => clk_ce_11120000_int,
+  --    clk => open
+  --  );
 
-  clk_ce_11120000_o <= clk_ce_11120000_int;
+  clk_ce_11120000_o <= '0';
 
-  -- Generate missing clk_ce_111200000
-  cmp_xlclockdriver_clk_ce_111200000 : xlclockdriver
-    generic map (
-      log_2_period => 27,
-      period => 112000000, -- FIXME: Change CE net name to the correct ones! This is just to avoid changing the interface
-      pipeline_regs => c_num_pipeline_regs,
-      use_bufg => 0
-    )
-    port map (
-      sysce => '1',
-      sysclk => fs_clk2x_i,
-      sysclr => sys_clr2x,
-      ce => clk_ce_111200000_int,
-      clk => open
-    );
+  ---- Generate missing clk_ce_111200000
+  --cmp_xlclockdriver_clk_ce_111200000 : xlclockdriver
+  --  generic map (
+  --    log_2_period => 27,
+  --    period => 112000000, -- FIXME: Change CE net name to the correct ones! This is just to avoid changing the interface
+  --    pipeline_regs => c_num_pipeline_regs,
+  --    use_bufg => 0
+  --  )
+  --  port map (
+  --    sysce => '1',
+  --    sysclk => fs_clk2x_i,
+  --    sysclr => sys_clr2x,
+  --    ce => clk_ce_111200000_int,
+  --    clk => open
+  --  );
 
-  clk_ce_111200000_o <= clk_ce_111200000_int;
+  clk_ce_111200000_o <= '0';
 
   -- Output CE
   clk_ce_1_o         <= clk_ce_1;
-  clk_ce_1112_o      <= clk_ce_1112;
-  clk_ce_1390000_o   <= clk_ce_1390000;
   clk_ce_2_o         <= clk_ce_2;
+  clk_ce_70_o        <= clk_ce_70; 
   clk_ce_2224_o      <= clk_ce_2224;
   clk_ce_22240000_o  <= clk_ce_22240000;
-  clk_ce_222400000_o <= clk_ce_222400000;
-  clk_ce_2780000_o   <= clk_ce_2780000;
-  clk_ce_35_o        <= clk_ce_35;
-  clk_ce_5000_o      <= clk_ce_5000;
-  clk_ce_556_o       <= clk_ce_556;
-  clk_ce_5560000_o   <= clk_ce_5560000;
-  clk_ce_70_o        <= clk_ce_70;
+  clk_ce_1112_o      <= '0'; 
+  clk_ce_1390000_o   <= '0'; 
+  clk_ce_222400000_o <= '0'; 
+  clk_ce_2780000_o   <= '0'; 
+  clk_ce_35_o        <= '0'; 
+  clk_ce_5000_o      <= '0'; 
+  clk_ce_556_o       <= '0'; 
+  clk_ce_5560000_o   <= '0'; 
 
   --------------------------------------------------------------------------
   -- Position Calc Counters
@@ -1309,13 +1522,13 @@ begin
         fifo_tbt_decim_valid_in <= '0';
       elsif clk_ce_70 = '1' then
         fifo_tbt_decim_in <=  tbt_decim_ch3_q & -- 8*c_dsp_ref_num_bits-1 downto 7*c_dsp_ref_num_bits
-                        tbt_decim_ch3_i & -- 7*c_dsp_ref_num_bits-1 downto 6*c_dsp_ref_num_bits
-                        tbt_decim_ch2_q & -- 6*c_dsp_ref_num_bits-1 downto 5*c_dsp_ref_num_bits
-                        tbt_decim_ch2_i & -- 5*c_dsp_ref_num_bits-1 downto 4*c_dsp_ref_num_bits
-                        tbt_decim_ch1_q & -- 4*c_dsp_ref_num_bits-1 downto 3*c_dsp_ref_num_bits
-                        tbt_decim_ch1_i & -- 3*c_dsp_ref_num_bits-1 downto 2*c_dsp_ref_num_bits
-                        tbt_decim_ch0_q & -- 2*c_dsp_ref_num_bits-1 downto c_dsp_ref_num_bits
-                        tbt_decim_ch0_i;  -- c_dsp_ref_num_bits-1 downto 0
+                              tbt_decim_ch3_i & -- 7*c_dsp_ref_num_bits-1 downto 6*c_dsp_ref_num_bits
+                              tbt_decim_ch2_q & -- 6*c_dsp_ref_num_bits-1 downto 5*c_dsp_ref_num_bits
+                              tbt_decim_ch2_i & -- 5*c_dsp_ref_num_bits-1 downto 4*c_dsp_ref_num_bits
+                              tbt_decim_ch1_q & -- 4*c_dsp_ref_num_bits-1 downto 3*c_dsp_ref_num_bits
+                              tbt_decim_ch1_i & -- 3*c_dsp_ref_num_bits-1 downto 2*c_dsp_ref_num_bits
+                              tbt_decim_ch0_q & -- 2*c_dsp_ref_num_bits-1 downto c_dsp_ref_num_bits
+                              tbt_decim_ch0_i;  -- c_dsp_ref_num_bits-1 downto 0
 
         fifo_tbt_decim_valid_in <= tbt_decim_valid;
       else
@@ -1765,55 +1978,61 @@ begin
   --                         Monitoring 1 Hz data                         --
   --------------------------------------------------------------------------
 
-  -- Monitoring 1 Hz position data
-  cmp_position_calc_cdc_fifo_monit_1_pos : position_calc_cdc_fifo
-  generic map
-  (
-    g_data_width                              => c_cdc_data_pos_width,
-    g_size                                    => c_cdc_ref_size
-  )
-  port map
-  (
-    clk_wr_i                                  => fs_clk2x_i,
-    data_i                                    => fifo_monit_1_pos_in,
-    valid_i                                   => fifo_monit_1_pos_valid_in,
+  ---- Monitoring 1 Hz position data
+  --cmp_position_calc_cdc_fifo_monit_1_pos : position_calc_cdc_fifo
+  --generic map
+  --(
+  --  g_data_width                              => c_cdc_data_pos_width,
+  --  g_size                                    => c_cdc_ref_size
+  --)
+  --port map
+  --(
+  --  clk_wr_i                                  => fs_clk2x_i,
+  --  data_i                                    => fifo_monit_1_pos_in,
+  --  valid_i                                   => fifo_monit_1_pos_valid_in,
 
-    clk_rd_i                                  => fs_clk_i,
-    data_o                                    => fifo_monit_1_pos_out,
-    valid_o                                   => fifo_monit_1_pos_valid_out
-  );
+  --  clk_rd_i                                  => fs_clk_i,
+  --  data_o                                    => fifo_monit_1_pos_out,
+  --  valid_o                                   => fifo_monit_1_pos_valid_out
+  --);
 
-  p_reg_cdc_fifo_monit_1_pos_inputs : process(fs_clk2x_i)
-  begin
-    if rising_edge(fs_clk2x_i) then
-      if fs_rst2x_n_i = '0' then
-        fifo_monit_1_pos_in <= (others => '0');
-        fifo_monit_1_pos_valid_in <= '0';
-      elsif clk_ce_222400000 = '1' then
-        fifo_monit_1_pos_in <= sum_monit_1 & -- 4*c_dsp_pos_num_bits-1 downto 3*c_dsp_pos_num_bits
-                            q_monit_1 &   -- 3*c_dsp_pos_num_bits-1 downto 2*c_dsp_pos_num_bits
-                            y_monit_1 &   -- 2*c_dsp_pos_num_bits-1 downto   c_dsp_pos_num_bits
-                            x_monit_1;    -- c_dsp_pos_num_bits-1 downto 0
+  --p_reg_cdc_fifo_monit_1_pos_inputs : process(fs_clk2x_i)
+  --begin
+  --  if rising_edge(fs_clk2x_i) then
+  --    if fs_rst2x_n_i = '0' then
+  --      fifo_monit_1_pos_in <= (others => '0');
+  --      fifo_monit_1_pos_valid_in <= '0';
+  --    elsif clk_ce_222400000 = '1' then
+  --      fifo_monit_1_pos_in <= sum_monit_1 & -- 4*c_dsp_pos_num_bits-1 downto 3*c_dsp_pos_num_bits
+  --                          q_monit_1 &   -- 3*c_dsp_pos_num_bits-1 downto 2*c_dsp_pos_num_bits
+  --                          y_monit_1 &   -- 2*c_dsp_pos_num_bits-1 downto   c_dsp_pos_num_bits
+  --                          x_monit_1;    -- c_dsp_pos_num_bits-1 downto 0
 
-        fifo_monit_1_pos_valid_in <= x_monit_1_valid;
-      else
-        fifo_monit_1_pos_valid_in <= '0';
-      end if;
-    end if;
-  end process;
+  --      fifo_monit_1_pos_valid_in <= x_monit_1_valid;
+  --    else
+  --      fifo_monit_1_pos_valid_in <= '0';
+  --    end if;
+  --  end if;
+  --end process;
 
-  sum_monit_1_fs_sync <= fifo_monit_1_pos_out(4*c_dsp_pos_num_bits-1 downto 3*c_dsp_pos_num_bits);
-  q_monit_1_fs_sync   <= fifo_monit_1_pos_out(3*c_dsp_pos_num_bits-1 downto 2*c_dsp_pos_num_bits);
-  y_monit_1_fs_sync   <= fifo_monit_1_pos_out(2*c_dsp_pos_num_bits-1 downto c_dsp_pos_num_bits);
-  x_monit_1_fs_sync   <= fifo_monit_1_pos_out(c_dsp_pos_num_bits-1 downto 0);
+  --sum_monit_1_fs_sync <= fifo_monit_1_pos_out(4*c_dsp_pos_num_bits-1 downto 3*c_dsp_pos_num_bits);
+  --q_monit_1_fs_sync   <= fifo_monit_1_pos_out(3*c_dsp_pos_num_bits-1 downto 2*c_dsp_pos_num_bits);
+  --y_monit_1_fs_sync   <= fifo_monit_1_pos_out(2*c_dsp_pos_num_bits-1 downto c_dsp_pos_num_bits);
+  --x_monit_1_fs_sync   <= fifo_monit_1_pos_out(c_dsp_pos_num_bits-1 downto 0);
 
-  pos_monit_1_valid_fs_sync <= fifo_monit_1_pos_valid_out;
+  --pos_monit_1_valid_fs_sync <= fifo_monit_1_pos_valid_out;
 
-  pos_sum_monit_1_o  <=  sum_monit_1_fs_sync;
-  pos_q_monit_1_o    <=  q_monit_1_fs_sync;
-  pos_y_monit_1_o    <=  y_monit_1_fs_sync;
-  pos_x_monit_1_o    <=  x_monit_1_fs_sync;
+  --pos_sum_monit_1_o  <=  sum_monit_1_fs_sync;
+  --pos_q_monit_1_o    <=  q_monit_1_fs_sync;
+  --pos_y_monit_1_o    <=  y_monit_1_fs_sync;
+  --pos_x_monit_1_o    <=  x_monit_1_fs_sync;
 
-  pos_monit_1_valid_o <= pos_monit_1_valid_fs_sync;
+  --pos_monit_1_valid_o <= pos_monit_1_valid_fs_sync;
+
+  pos_x_monit_1_o <= (others => '0');
+  pos_y_monit_1_o <= (others => '0');
+  pos_q_monit_1_o <= (others => '0');
+  pos_sum_monit_1_o <= (others => '0');
+  pos_monit_1_valid_o <= '0';
 
 end rtl;

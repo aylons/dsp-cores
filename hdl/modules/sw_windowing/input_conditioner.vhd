@@ -70,6 +70,8 @@ architecture structural of input_conditioner is
   signal cur_address   : std_logic_vector(c_bus_size-1 downto 0) := (others => '0');  -- Current index for lookup table
   signal window_factor : std_logic_vector(g_window_width-1 downto 0);  -- Current value of the window
                                         -- factor, signed int
+  signal reset_i       : std_logic;
+
   component counter is
     generic (
       g_mem_size     : natural;
@@ -95,12 +97,14 @@ architecture structural of input_conditioner is
       a_i       : in  std_logic_vector(g_a_width-1 downto 0);
       b_i       : in  std_logic_vector(g_b_width-1 downto 0);
       p_o       : out std_logic_vector(g_p_width-1 downto 0);
+      ce_i      : in  std_logic;
       clk_i     : in  std_logic;
-      reset_n_i : in  std_logic);
+      reset_i   : in  std_logic);
   end component generic_multiplier;
   
 
 begin
+  reset_i <= not reset_n_i;
 
   cmp_lut : generic_simple_dpram
     generic map (
@@ -155,7 +159,8 @@ begin
       b_i       => window_factor,
       p_o       => a_o,
       clk_i     => clk_i,
-      reset_n_i => reset_n_i);
+      ce_i      => '1',
+      reset_i   => reset_i);
 
   cmp_multiplier_b : generic_multiplier
     generic map (
@@ -168,7 +173,8 @@ begin
       b_i       => window_factor,
       p_o       => b_o,
       clk_i     => clk_i,
-      reset_n_i => reset_n_i);
+      ce_i      => '1',
+      reset_i   => reset_i);
 
   cmp_multiplier_c : generic_multiplier
     generic map (
@@ -181,7 +187,8 @@ begin
       b_i       => window_factor,
       p_o       => c_o,
       clk_i     => clk_i,
-      reset_n_i => reset_n_i);
+      ce_i      => '1',
+      reset_i   => reset_i);
 
   cmp_multiplier_d : generic_multiplier
     generic map (
@@ -194,6 +201,7 @@ begin
       b_i       => window_factor,
       p_o       => d_o,
       clk_i     => clk_i,
-      reset_n_i => reset_n_i);
+      ce_i      => '1',
+      reset_i   => reset_i);
 
 end structural;
