@@ -6,7 +6,7 @@
 -- Author     : aylons  <aylons@LNLS190>
 -- Company    : 
 -- Created    : 2014-05-06
--- Last update: 2014-06-05
+-- Last update: 2014-07-16
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -191,11 +191,17 @@ architecture rtl of position_nosysgen is
   constant c_cos_file    : string  := "./dds_cos.nif";
   constant c_dds_points  : natural := 6;
 
-  constant c_cic_delay   : natural := 2;
-  constant c_cic_stages  : natural := 3;
-  constant c_fofb_ratio  : natural := 1000;
-  constant c_tbt_ratio   : natural := 203;
-  constant c_monit_ratio : natural := 2e3;
+  constant c_tbt_cic_delay  : natural := 2;
+  constant c_tbt_cic_stages : natural := 3;
+  constant c_tbt_ratio      : natural := 203;
+
+  constant c_fofb_cic_delay  : natural := 1;
+  constant c_fofb_cic_stages : natural := 1;
+  constant c_fofb_ratio      : natural := 5;
+
+  constant c_monit_cic_delay  : natural := 1;
+  constant c_monit_cic_stages : natural := 1;
+  constant c_monit_ratio      : natural := 2049;
 
   constant c_cic_fofb_width  : natural := natural(ceil(log2(real(c_fofb_ratio))));
   constant c_cic_monit_width : natural := natural(ceil(log2(real(c_monit_ratio))));
@@ -218,39 +224,40 @@ architecture rtl of position_nosysgen is
   --Signals--
   -----------
   type input_slv is array(3 downto 0) of std_logic_vector(c_input_width-1 downto 0);
-  signal adc_input : input_slv;
+  signal adc_input : input_slv := (others => (others => '0'));
 
   type mixed_slv is array(3 downto 0) of std_logic_vector(c_mixed_width-1 downto 0);
-  signal full_i, full_q : mixed_slv;
+  signal full_i, full_q : mixed_slv := (others => (others => '0'));
 
 
   -- decimated data
   type decim_data is array(3 downto 0) of std_logic_vector(c_decim_width-1 downto 0);
-  signal fofb_i, fofb_q, fofb_mag, fofb_phase : decim_data;
+  signal fofb_i, fofb_q, fofb_mag, fofb_phase : decim_data := (others => (others => '0'));
 
-  signal tbt_i, tbt_q, tbt_mag, tbt_phase : decim_data;
+  signal tbt_i, tbt_q, tbt_mag, tbt_phase : decim_data := (others => (others => '0'));
 
-  signal monit_i, monit_q, monit_mag, monit_phase : decim_data;
+  signal monit_mag : decim_data := (others => (others => '0'));
 
   --after deltasigma
 
   signal fofb_x_pre, fofb_y_pre, fofb_q_pre, fofb_sum_pre :
-    std_logic_vector(c_decim_width-1 downto 0);
+    std_logic_vector(c_decim_width-1 downto 0) := (others => '0');
 
   signal tbt_x_pre, tbt_y_pre, tbt_q_pre, tbt_sum_pre :
-    std_logic_vector(c_decim_width-1 downto 0);
+    std_logic_vector(c_decim_width-1 downto 0) := (others => '0');
 
   signal monit_x_pre, monit_y_pre, monit_q_pre, monit_sum_pre :
-    std_logic_vector(c_decim_width-1 downto 0);
+    std_logic_vector(c_decim_width-1 downto 0) := (others => '0');
 
 
   ----------------------------
   --Clocks and clock enables--
   ----------------------------
-  signal ce_adc : std_logic;
-
   type ce_sl is array(3 downto 0) of std_logic;
-  signal ce_fofb, ce_monit, ce_tbt : ce_sl;
+  signal ce_adc, ce_fofb, ce_monit, ce_tbt : ce_sl := (others => '0');
+
+  attribute max_fanout                                      : string;
+  attribute max_fanout of ce_adc, ce_fofb, ce_monit, ce_tbt : signal is "50";
 
   component strobe_gen is
     generic (
@@ -329,6 +336,7 @@ architecture rtl of position_nosysgen is
       y_i     : in  std_logic_vector(g_width-1 downto 0);
       clk_i   : in  std_logic;
       ce_i    : in  std_logic;
+      rst_i   : in  std_logic;
       mag_o   : out std_logic_vector(g_width-1 downto 0);
       phase_o : out std_logic_vector(g_width-1 downto 0));
   end component cordic_vectoring_slv;
@@ -356,18 +364,6 @@ architecture rtl of position_nosysgen is
   
 begin
 
-                                        -- Generate clock enable
-  cmp_ce_adc : strobe_gen
-    generic map (
-      g_maxrate   => 2,
-      g_bus_width => 2)
-    port map (
-      clock_i  => clk,
-      reset_i  => '0',
-      ce_i     => '1',
-      ratio_i  => std_logic_vector(to_unsigned(2, 2)),
-      strobe_o => ce_adc);
-
   adc_input(0) <= adc_ch0_i;
   adc_input(1) <= adc_ch1_i;
   adc_input(2) <= adc_ch2_i;
@@ -375,6 +371,19 @@ begin
 
   gen_ddc : for chan in 3 downto 0 generate
 
+    -- Generate clock enable
+    cmp_ce_adc : strobe_gen
+      generic map (
+        g_maxrate   => 2,
+        g_bus_width => 2)
+      port map (
+        clock_i  => clk,
+        reset_i  => '0',
+        ce_i     => '1',
+        ratio_i  => std_logic_vector(to_unsigned(2, 2)),
+        strobe_o => ce_adc(chan));
+
+    
     cmp_mixer : mixer
       generic map (
         g_sin_file         => c_sin_file,
@@ -386,72 +395,24 @@ begin
       port map (
         reset_i     => clr,
         clock_i     => clk,
-        ce_i        => ce_adc,
+        ce_i        => ce_adc(chan),
         signal_i    => adc_input(chan),
         phase_sel_i => (others => '0'),
         I_out       => full_i(chan),
         Q_out       => full_q(chan));
 
-    cmp_fofb_cic : cic_dual
-      generic map (
-        g_input_width  => c_mixed_width,
-        g_output_width => c_decim_width,
-        g_stages       => c_cic_stages,
-        g_delay        => c_cic_delay,
-        g_max_rate     => c_fofb_ratio,
-        g_bus_width    => c_cic_fofb_width)
-      port map (
-        clock_i => clk,
-        reset_i => clr,
-        ce_i    => ce_adc,
-        I_i     => full_i(chan),
-        Q_i     => full_q(chan),
-        ratio_i => c_fofb_ratio_slv,
-        I_o     => fofb_i(chan),
-        Q_o     => fofb_q(chan),
-        valid_o => ce_fofb(chan));
-
-    cmp_fofb_cordic : cordic_vectoring_slv
-      generic map (
-        g_stages => c_cordic_stages,
-        g_width  => c_decim_width)
-      port map (
-        x_i     => fofb_i(chan),
-        y_i     => fofb_q(chan),
-        clk_i   => clk,
-        ce_i    => ce_fofb(chan),
-        mag_o   => fofb_mag(chan),
-        phase_o => fofb_phase(chan)); 
-
-    cmp_monit_cic : cic_dyn
-      generic map (
-        g_input_width  => c_decim_width,
-        g_output_width => c_decim_width,
-        g_stages       => c_cic_stages,
-        g_delay        => c_cic_delay,
-        g_max_rate     => c_monit_ratio,
-        g_bus_width    => c_cic_monit_width)
-      port map (
-        clock_i => clk,
-        reset_i => clr,
-        ce_i    => ce_adc,
-        data_i  => fofb_mag(chan),
-        ratio_i => c_monit_ratio_slv,
-        data_o  => monit_i(chan),
-        valid_o => ce_monit(chan));
-
     cmp_tbt_cic : cic_dual
       generic map (
         g_input_width  => c_mixed_width,
         g_output_width => c_decim_width,
-        g_stages       => c_cic_stages,
-        g_delay        => c_cic_delay,
+        g_stages       => c_tbt_cic_stages,
+        g_delay        => c_tbt_cic_stages,
         g_max_rate     => c_tbt_ratio,
         g_bus_width    => c_cic_tbt_width)
       port map (
         clock_i => clk,
         reset_i => clr,
-        ce_i    => ce_adc,
+        ce_i    => ce_adc(chan),
         I_i     => full_i(chan),
         Q_i     => full_q(chan),
         ratio_i => c_tbt_ratio_slv,
@@ -468,8 +429,45 @@ begin
         y_i     => tbt_q(chan),
         clk_i   => clk,
         ce_i    => ce_tbt(chan),
+        rst_i   => clr,
         mag_o   => tbt_mag(chan),
         phase_o => tbt_phase(chan)); 
+
+    cmp_fofb_cic : cic_dual
+      generic map (
+        g_input_width  => c_decim_width,
+        g_output_width => c_decim_width,
+        g_stages       => c_fofb_cic_stages,
+        g_delay        => c_fofb_cic_delay,
+        g_max_rate     => c_fofb_ratio,
+        g_bus_width    => c_cic_fofb_width)
+      port map (
+        clock_i => clk,
+        reset_i => clr,
+        ce_i    => ce_tbt(chan),
+        I_i     => tbt_mag(chan),
+        Q_i     => tbt_phase(chan),
+        ratio_i => c_fofb_ratio_slv,
+        I_o     => fofb_mag(chan),
+        Q_o     => fofb_phase(chan),
+        valid_o => ce_fofb(chan));
+
+    cmp_monit_cic : cic_dyn
+      generic map (
+        g_input_width  => c_decim_width,
+        g_output_width => c_decim_width,
+        g_stages       => c_tbt_cic_stages,
+        g_delay        => c_tbt_cic_delay,
+        g_max_rate     => c_monit_ratio,
+        g_bus_width    => c_cic_monit_width)
+      port map (
+        clock_i => clk,
+        reset_i => clr,
+        ce_i    => ce_fofb(chan),
+        data_i  => fofb_mag(chan),
+        ratio_i => c_monit_ratio_slv,
+        data_o  => monit_mag(chan),
+        valid_o => ce_monit(chan));
 
   end generate gen_ddc;
 
@@ -506,7 +504,7 @@ begin
       ky_i   => ky_i,
       ksum_i => ksum_i,
       clk_i  => clk,
-      ce_i   => ce_monit(0),
+      ce_i   => ce_monit(1),
       rst_i  => clr,
       x_o    => x_monit_o,
       y_o    => y_monit_o,
@@ -526,7 +524,7 @@ begin
       ky_i   => ky_i,
       ksum_i => ksum_i,
       clk_i  => clk,
-      ce_i   => ce_tbt(0),
+      ce_i   => ce_tbt(2),
       rst_i  => clr,
       x_o    => x_tbt_o,
       y_o    => y_tbt_o,
@@ -564,14 +562,14 @@ begin
   tbt_pha_ch3_o <= tbt_phase(3);
 
 
-  fofb_decim_ch0_i_o <= fofb_i(0);
-  fofb_decim_ch0_q_o <= fofb_q(0);
-  fofb_decim_ch1_i_o <= fofb_i(1);
-  fofb_decim_ch1_q_o <= fofb_q(1);
-  fofb_decim_ch2_i_o <= fofb_i(2);
-  fofb_decim_ch2_q_o <= fofb_q(2);
-  fofb_decim_ch3_i_o <= fofb_i(3);
-  fofb_decim_ch3_q_o <= fofb_q(3);
+  fofb_decim_ch0_i_o <= (others => '0');
+  fofb_decim_ch0_q_o <= (others => '0');
+  fofb_decim_ch1_i_o <= (others => '0');
+  fofb_decim_ch1_q_o <= (others => '0');
+  fofb_decim_ch2_i_o <= (others => '0');
+  fofb_decim_ch2_q_o <= (others => '0');
+  fofb_decim_ch3_i_o <= (others => '0');
+  fofb_decim_ch3_q_o <= (others => '0');
 
   fofb_amp_ch0_o <= fofb_mag(0);
   fofb_amp_ch1_o <= fofb_mag(1);
@@ -608,7 +606,7 @@ begin
   clk_ce_monit_o <= ce_monit(0);
   clk_ce_fofb_o  <= ce_fofb(0);
 
-  clk_ce_2_o <= ce_adc;
+  clk_ce_2_o <= ce_adc(0);
 
   -- Just for Compatibility !!!
   adc_ch0_dbg_data_o <= (others => '0');
@@ -628,5 +626,5 @@ begin
   monit_cic_unexpected_o <= '0';
   monit_cfir_incorrect_o <= '0';
   monit_pfir_incorrect_o <= '0';
-
+  
 end rtl;
