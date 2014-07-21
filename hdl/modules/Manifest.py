@@ -8,6 +8,7 @@ modules = { "local" : [
 			"wb_un_cross",
             "sw_windowing",
 			"multiplier",
+			"pipeline",
 			"cic",
 			"cordic",
 			"divider",

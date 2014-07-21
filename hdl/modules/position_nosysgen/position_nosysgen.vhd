@@ -186,6 +186,7 @@ architecture rtl of position_nosysgen is
   constant c_input_width : natural := adc_ch0_i'length;
   constant c_mixed_width : natural := mix_ch0_i_o'length;
   constant c_decim_width : natural := c_mixed_width+8;
+  --constant c_decim_width : natural := c_mixed_width;
   constant c_phase_width : natural := 8;
   constant c_sin_file    : string  := "./dds_sin.nif";
   constant c_cos_file    : string  := "./dds_cos.nif";
@@ -215,7 +216,8 @@ architecture rtl of position_nosysgen is
 
 
   --Cordic
-  constant c_cordic_stages : natural := c_decim_width+1;
+  ------------------------------constant c_cordic_stages : natural := c_decim_width+1;
+  constant c_cordic_stages : natural := 25;
 
   -- Actual position calculation
   constant c_output_width : natural := x_fofb_o'length;
@@ -256,8 +258,8 @@ architecture rtl of position_nosysgen is
   type ce_sl is array(3 downto 0) of std_logic;
   signal ce_adc, ce_fofb, ce_monit, ce_tbt : ce_sl := (others => '0');
 
-  attribute max_fanout                                      : string;
-  attribute max_fanout of ce_adc, ce_fofb, ce_monit, ce_tbt : signal is "50";
+  attribute MAX_FANOUT                                      : string;
+  attribute MAX_FANOUT of ce_adc, ce_fofb, ce_monit, ce_tbt : signal is "REDUCE";
 
   component strobe_gen is
     generic (
@@ -486,10 +488,10 @@ begin
       clk_i  => clk,
       ce_i   => ce_fofb(0),
       rst_i  => clr,
-      x_o    => x_fofb_o,
-      y_o    => y_fofb_o,
-      q_o    => q_fofb_o,
-      sum_o  => sum_fofb_o);
+      x_o (c_decim_width-1 downto 0)   => x_fofb_o(c_decim_width-1 downto 0),
+      y_o (c_decim_width-1 downto 0)   => y_fofb_o(c_decim_width-1 downto 0),
+      q_o (c_decim_width-1 downto 0)   => q_fofb_o(c_decim_width-1 downto 0),
+      sum_o (c_decim_width-1 downto 0)   => sum_fofb_o(c_decim_width-1 downto 0));
 
   cmp_monit_ds : delta_sigma
     generic map (
@@ -506,10 +508,10 @@ begin
       clk_i  => clk,
       ce_i   => ce_monit(1),
       rst_i  => clr,
-      x_o    => x_monit_o,
-      y_o    => y_monit_o,
-      q_o    => q_monit_o,
-      sum_o  => sum_monit_o);
+      x_o (c_decim_width-1 downto 0)   => x_monit_o(c_decim_width-1 downto 0),
+      y_o (c_decim_width-1 downto 0)   => y_monit_o(c_decim_width-1 downto 0),
+      q_o (c_decim_width-1 downto 0)   => q_monit_o(c_decim_width-1 downto 0),
+      sum_o (c_decim_width-1 downto 0)   => sum_monit_o(c_decim_width-1 downto 0));
 
   cmp_tbt_ds : delta_sigma
     generic map (
@@ -526,10 +528,10 @@ begin
       clk_i  => clk,
       ce_i   => ce_tbt(2),
       rst_i  => clr,
-      x_o    => x_tbt_o,
-      y_o    => y_tbt_o,
-      q_o    => q_tbt_o,
-      sum_o  => sum_tbt_o);
+      x_o (c_decim_width-1 downto 0)   => x_tbt_o(c_decim_width-1 downto 0),
+      y_o (c_decim_width-1 downto 0)   => y_tbt_o(c_decim_width-1 downto 0),
+      q_o (c_decim_width-1 downto 0)   => q_tbt_o(c_decim_width-1 downto 0),
+      sum_o (c_decim_width-1 downto 0)   => sum_tbt_o(c_decim_width-1 downto 0));
 
   -- Wiring intermediate signals to outputs
 
