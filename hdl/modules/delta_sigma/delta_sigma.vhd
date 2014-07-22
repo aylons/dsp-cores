@@ -44,7 +44,8 @@ entity ds_first_stage is
 end entity ds_first_stage;
 
 architecture behavioral of ds_first_stage is
-
+  signal diff_ba, diff_cd, diff_ac, diff_bd : signed(g_width-1 downto 0);
+  signal sum_ab, sum_cd                     : signed(g_width-1 downto 0);
 begin
 
 
@@ -55,22 +56,29 @@ begin
   -- sum = a+b+c+d
   
   stage1 : process(clk_i)
-    variable a, b, c, d, x, y, q, sum : signed(g_width-1 downto 0);
+    variable a, b, c, d : signed(g_width-1 downto 0);
   begin
+    -- to avoid multiple stages of combinatorial logic, divide it between difference and sum.
+    -- Remeber signals are only updated at the end of process
 
     if rising_edge(clk_i) then
       if ce_i = '1' then
         a := signed(a_i); b := signed(b_i); c := signed(c_i); d := signed(d_i);
 
-        x   := (b + c) - (a + d);
-        y   := (a + b) - (c + d);
-        q   := (a + c) - (b + d);
-        sum := (a + b) + (c + d);
+        -- First cycle
+        diff_ba <= b - a;
+        diff_cd <= c - d;
+        diff_ac <= a - c;
+        diff_bd <= b - d;
+        sum_ab  <= a + b;
+        sum_cd  <= c + d;
 
-        x_o   <= std_logic_vector(x);
-        y_o   <= std_logic_vector(y);
-        q_o   <= std_logic_vector(q);
-        sum_o <= std_logic_vector(sum);
+        -- Second cycle
+
+        x_o   <= std_logic_vector(diff_ba + diff_cd);
+        y_o   <= std_logic_vector(diff_ac + diff_bd);
+        q_o   <= std_logic_vector(diff_cd - diff_ba);
+        sum_o <= std_logic_vector(sum_ab + sum_cd);
       end if;
     end if;
     
@@ -120,7 +128,7 @@ architecture structural of ds_output_stage is
   attribute keep                                 : string;
   attribute keep of x_pre, y_pre, sum_pre : signal is "true";
 
-  constant c_levels : natural := 3;
+  constant c_levels : natural := 7;
 
   component pipeline is
     generic (
