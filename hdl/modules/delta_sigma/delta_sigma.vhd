@@ -45,7 +45,19 @@ end entity ds_first_stage;
 
 architecture behavioral of ds_first_stage is
   signal diff_ba, diff_cd, diff_ac, diff_bd : signed(g_width-1 downto 0);
+  signal diff_ba_int, diff_cd_int, diff_ac_int, diff_bd_int : std_logic_vector(g_width-1 downto 0);
   signal sum_ab, sum_cd                     : signed(g_width-1 downto 0);
+
+  component add_sub_coregen_dsp
+    port (
+      a : in std_logic_vector(31 downto 0);
+      b : in std_logic_vector(31 downto 0);
+      clk : in std_logic;
+      add : in std_logic;
+      ce : in std_logic;
+      s : out std_logic_vector(31 downto 0)
+    );
+  end component;
 begin
 
 
@@ -54,24 +66,95 @@ begin
   -- y = (a-c) + (b-d)
   -- q = (c-d) - (b-a)
   -- sum = a+b+c+d
+  cmp_diff_ba_addsub_dsp : add_sub_coregen_dsp
+    port map (
+      a 		=> b,
+      b   		=> a,
+      clk 		=> clk_i,
+      add		=> '0', -- sub
+      ce 		=> ce_i,
+      s 		=> diff_ba_int
+    );
+
+  diff_ba <= signed(diff_ba_int);
+  
+  cmp_diff_cd_addsub_dsp : add_sub_coregen_dsp
+    port map (
+      a 		=> c,
+      b   		=> d,
+      clk 		=> clk_i,
+      add		=> '0', -- sub
+      ce 		=> ce_i,
+      s 		=> diff_cd_int
+    );
+
+  diff_cd <= signed(diff_cd_int);
+  
+  cmp_diff_ac_addsub_dsp : add_sub_coregen_dsp
+    port map (
+      a 		=> a,
+      b   		=> c,
+      clk 		=> clk_i,
+      add		=> '0', -- sub
+      ce 		=> ce_i,
+      s 		=> diff_ac_int
+    );
+
+  diff_ac <= signed(diff_ac_int);
+  
+  cmp_diff_bd_addsub_dsp : add_sub_coregen_dsp
+    port map (
+      a 		=> b,
+      b   		=> d,
+      clk 		=> clk_i,
+      add		=> '0', -- sub
+      ce 		=> ce_i,
+      s 		=> diff_bd_int
+    );
+
+  diff_bd <= signed(diff_bd_int);
+  
+  cmp_sum_ab_addsub_dsp : add_sub_coregen_dsp
+    port map (
+      a 		=> a,
+      b   		=> b,
+      clk 		=> clk_i,
+      add		=> '1', -- add
+      ce 		=> ce_i,
+      s 		=> sum_ab_int
+    );
+
+  sum_ab <= signed(sum_ab_int);
+  
+  cmp_sum_cd_addsub_dsp : add_sub_coregen_dsp
+    port map (
+      a 		=> c,
+      b   		=> d,
+      clk 		=> clk_i,
+      add		=> '1', -- add
+      ce 		=> ce_i,
+      s 		=> sum_cd_int
+    );
+
+  sum_cd <= signed(sum_cd_int);
   
   stage1 : process(clk_i)
-    variable a, b, c, d : signed(g_width-1 downto 0);
+    --------------------------variable a, b, c, d : signed(g_width-1 downto 0);
   begin
     -- to avoid multiple stages of combinatorial logic, divide it between difference and sum.
     -- Remeber signals are only updated at the end of process
 
     if rising_edge(clk_i) then
       if ce_i = '1' then
-        a := signed(a_i); b := signed(b_i); c := signed(c_i); d := signed(d_i);
+        -------------------a := signed(a_i); b := signed(b_i); c := signed(c_i); d := signed(d_i);
 
-        -- First cycle
-        diff_ba <= b - a;
-        diff_cd <= c - d;
-        diff_ac <= a - c;
-        diff_bd <= b - d;
-        sum_ab  <= a + b;
-        sum_cd  <= c + d;
+        --------------------- First cycle
+        -------------------diff_ba <= b - a;
+        -------------------diff_cd <= c - d;
+        -------------------diff_ac <= a - c;
+        -------------------diff_bd <= b - d;
+        -------------------sum_ab  <= a + b;
+        -------------------sum_cd  <= c + d;
 
         -- Second cycle
 
