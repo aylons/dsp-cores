@@ -128,7 +128,7 @@ architecture structural of ds_output_stage is
   attribute keep                                 : string;
   attribute keep of x_pre, y_pre, sum_pre : signal is "true";
 
-  constant c_levels : natural := 7;
+  constant c_levels : natural := 3;
 
   component pipeline is
     generic (
