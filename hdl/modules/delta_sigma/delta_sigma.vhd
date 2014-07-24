@@ -47,8 +47,9 @@ architecture behavioral of ds_first_stage is
   signal diff_ba, diff_cd, diff_ac, diff_bd : signed(g_width-1 downto 0);
   signal diff_ba_int, diff_cd_int, diff_ac_int, diff_bd_int : std_logic_vector(g_width-1 downto 0);
   signal sum_ab, sum_cd                     : signed(g_width-1 downto 0);
+  signal sum_ab_int, sum_cd_int                     : std_logic_vector(g_width-1 downto 0);
 
-  component add_sub_coregen_dsp
+  component add_sub_coregen_dsp_32
     port (
       a : in std_logic_vector(31 downto 0);
       b : in std_logic_vector(31 downto 0);
@@ -66,10 +67,10 @@ begin
   -- y = (a-c) + (b-d)
   -- q = (c-d) - (b-a)
   -- sum = a+b+c+d
-  cmp_diff_ba_addsub_dsp : add_sub_coregen_dsp
+  cmp_diff_ba_addsub_dsp : add_sub_coregen_dsp_32
     port map (
-      a 		=> b,
-      b   		=> a,
+      a 		=> b_i,
+      b   		=> a_i,
       clk 		=> clk_i,
       add		=> '0', -- sub
       ce 		=> ce_i,
@@ -78,10 +79,10 @@ begin
 
   diff_ba <= signed(diff_ba_int);
   
-  cmp_diff_cd_addsub_dsp : add_sub_coregen_dsp
+  cmp_diff_cd_addsub_dsp : add_sub_coregen_dsp_32
     port map (
-      a 		=> c,
-      b   		=> d,
+      a 		=> c_i,
+      b   		=> d_i,
       clk 		=> clk_i,
       add		=> '0', -- sub
       ce 		=> ce_i,
@@ -90,10 +91,10 @@ begin
 
   diff_cd <= signed(diff_cd_int);
   
-  cmp_diff_ac_addsub_dsp : add_sub_coregen_dsp
+  cmp_diff_ac_addsub_dsp : add_sub_coregen_dsp_32
     port map (
-      a 		=> a,
-      b   		=> c,
+      a 		=> a_i,
+      b   		=> c_i,
       clk 		=> clk_i,
       add		=> '0', -- sub
       ce 		=> ce_i,
@@ -102,10 +103,10 @@ begin
 
   diff_ac <= signed(diff_ac_int);
   
-  cmp_diff_bd_addsub_dsp : add_sub_coregen_dsp
+  cmp_diff_bd_addsub_dsp : add_sub_coregen_dsp_32
     port map (
-      a 		=> b,
-      b   		=> d,
+      a 		=> b_i,
+      b   		=> d_i,
       clk 		=> clk_i,
       add		=> '0', -- sub
       ce 		=> ce_i,
@@ -114,10 +115,10 @@ begin
 
   diff_bd <= signed(diff_bd_int);
   
-  cmp_sum_ab_addsub_dsp : add_sub_coregen_dsp
+  cmp_sum_ab_addsub_dsp : add_sub_coregen_dsp_32
     port map (
-      a 		=> a,
-      b   		=> b,
+      a 		=> a_i,
+      b   		=> b_i,
       clk 		=> clk_i,
       add		=> '1', -- add
       ce 		=> ce_i,
@@ -126,10 +127,10 @@ begin
 
   sum_ab <= signed(sum_ab_int);
   
-  cmp_sum_cd_addsub_dsp : add_sub_coregen_dsp
+  cmp_sum_cd_addsub_dsp : add_sub_coregen_dsp_32
     port map (
-      a 		=> c,
-      b   		=> d,
+      a 		=> c_i,
+      b   		=> d_i,
       clk 		=> clk_i,
       add		=> '1', -- add
       ce 		=> ce_i,

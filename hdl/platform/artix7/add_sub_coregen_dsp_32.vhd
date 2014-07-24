@@ -26,8 +26,8 @@
 --    All rights reserved.                                                    --
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
--- You must compile the wrapper file add_sub_coregen.vhd when simulating
--- the core, add_sub_coregen. When compiling the wrapper file, be sure to
+-- You must compile the wrapper file add_sub_coregen_dsp_32.vhd when simulating
+-- the core, add_sub_coregen_dsp_32. When compiling the wrapper file, be sure to
 -- reference the XilinxCoreLib VHDL simulation library. For detailed
 -- instructions, please refer to the "CORE Generator Help".
 
@@ -40,41 +40,41 @@ USE ieee.std_logic_1164.ALL;
 -- synthesis translate_off
 LIBRARY XilinxCoreLib;
 -- synthesis translate_on
-ENTITY add_sub_coregen IS
+ENTITY add_sub_coregen_dsp_32 IS
   PORT (
-    a : IN STD_LOGIC_VECTOR(32 DOWNTO 0);
-    b : IN STD_LOGIC_VECTOR(32 DOWNTO 0);
+    a : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+    b : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
     clk : IN STD_LOGIC;
     add : IN STD_LOGIC;
     ce : IN STD_LOGIC;
-    s : OUT STD_LOGIC_VECTOR(32 DOWNTO 0)
+    s : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
   );
-END add_sub_coregen;
+END add_sub_coregen_dsp_32;
 
-ARCHITECTURE add_sub_coregen_a OF add_sub_coregen IS
+ARCHITECTURE add_sub_coregen_dsp_32_a OF add_sub_coregen_dsp_32 IS
 -- synthesis translate_off
-COMPONENT wrapped_add_sub_coregen
+COMPONENT wrapped_add_sub_coregen_dsp_32
   PORT (
-    a : IN STD_LOGIC_VECTOR(32 DOWNTO 0);
-    b : IN STD_LOGIC_VECTOR(32 DOWNTO 0);
+    a : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+    b : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
     clk : IN STD_LOGIC;
     add : IN STD_LOGIC;
     ce : IN STD_LOGIC;
-    s : OUT STD_LOGIC_VECTOR(32 DOWNTO 0)
+    s : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
   );
 END COMPONENT;
 
 -- Configuration specification
-  FOR ALL : wrapped_add_sub_coregen USE ENTITY XilinxCoreLib.c_addsub_v11_0(behavioral)
+  FOR ALL : wrapped_add_sub_coregen_dsp_32 USE ENTITY XilinxCoreLib.c_addsub_v11_0(behavioral)
     GENERIC MAP (
       c_a_type => 0,
-      c_a_width => 33,
+      c_a_width => 32,
       c_add_mode => 2,
       c_ainit_val => "0",
       c_b_constant => 0,
       c_b_type => 0,
-      c_b_value => "000000000000000000000000000000000",
-      c_b_width => 33,
+      c_b_value => "00000000000000000000000000000000",
+      c_b_width => 32,
       c_borrow_low => 1,
       c_bypass_low => 0,
       c_ce_overrides_bypass => 1,
@@ -86,9 +86,9 @@ END COMPONENT;
       c_has_sclr => 0,
       c_has_sinit => 0,
       c_has_sset => 0,
-      c_implementation => 0,
-      c_latency => 3,
-      c_out_width => 33,
+      c_implementation => 1,
+      c_latency => 2,
+      c_out_width => 32,
       c_sclr_overrides_sset => 1,
       c_sinit_val => "0",
       c_verbosity => 0,
@@ -97,7 +97,7 @@ END COMPONENT;
 -- synthesis translate_on
 BEGIN
 -- synthesis translate_off
-U0 : wrapped_add_sub_coregen
+U0 : wrapped_add_sub_coregen_dsp_32
   PORT MAP (
     a => a,
     b => b,
@@ -108,4 +108,4 @@ U0 : wrapped_add_sub_coregen
   );
 -- synthesis translate_on
 
-END add_sub_coregen_a;
+END add_sub_coregen_dsp_32_a;
