@@ -6,7 +6,7 @@
 -- Author     : aylons  <aylons@LNLS190>
 -- Company    : 
 -- Created    : 2014-05-28
--- Last update: 2014-08-01
+-- Last update: 2014-08-02
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -345,12 +345,12 @@ begin
       end if;
       if ce_adc = '1' then
         -- Write mixed data
-        mix_i := to_integer(unsigned(mix_ch0_i));
+        mix_i := to_integer(signed(mix_ch0_i));
         write(cur_line, mix_i);
 
         write(cur_line, string'(" "));
 
-        mix_q := to_integer(unsigned(mix_ch0_q));
+        mix_q := to_integer(signed(mix_ch0_q));
         write(cur_line, mix_q);
 
         writeline(mixed_file, cur_line);
