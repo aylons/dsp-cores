@@ -1,0 +1,22 @@
+-------------------------------------------------------------------------------
+-- Title      : Wishbone stream testbench
+-- Project    : 
+-------------------------------------------------------------------------------
+-- File       : wb_stream_tb.vhd
+-- Author     : aylons  <aylons@LNLS190>
+-- Company    : 
+-- Created    : 2014-08-15
+-- Last update: 2014-08-15
+-- Platform   : 
+-- Standard   : VHDL'93/02
+-------------------------------------------------------------------------------
+-- Description: Tests basic functionaliy of wishbone stream components: sink
+-- and source, in a few common situations.
+-------------------------------------------------------------------------------
+-- Copyright (c) 2014 
+-------------------------------------------------------------------------------
+-- Revisions  :
+-- Date        Version  Author  Description
+-- 2014-08-15  1.0      aylons	Created
+-------------------------------------------------------------------------------
+

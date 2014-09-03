@@ -6,19 +6,19 @@
 -- Author     : aylons  <aylons@LNLS190>
 -- Company    : 
 -- Created    : 2014-08-12
--- Last update: 2014-08-12
+-- Last update: 2014-08-19
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
 -- Description: Definitions for components using wishbone stream packages.
 -- Heavily based on wb_fabric_pkg.vhd from Tomasz Wlostowski. Originally
--- proposed and built by Lucas Maziero Russo <lucas.russo@lnls.br>.
+-- proposed by Lucas Maziero Russo <lucas.russo@lnls.br>.
 -------------------------------------------------------------------------------
 -- Copyright (c) 2014 
 -------------------------------------------------------------------------------
 -- Revisions  :
 -- Date        Version  Author  Description
--- 2014-08-12  1.0      aylons	Created
+-- 2014-08-12  1.0      aylons  Created
 -------------------------------------------------------------------------------
 
 library ieee;
@@ -28,26 +28,34 @@ use ieee.numeric_std.all;
 library work;
 use work.wishbone_pkg.all;
 
+
 package wb_stream_pkg is
 
-  -- Must be at least 2 bits wide
-  constant c_wbs_address_width      : integer := 4;
-  
-  -- Must be at least 16 bits wide. Not a good solution, as streaming interfaces
-  -- might different widths. FIX ME!
-  constant c_wbs_data_width         : integer := 64;
+  -- These widths are used for connecting blocks. The actual bus width for each
+  -- connection will be determined by the actual interface components, in
+  -- their generics.
+  constant c_wbs_address_width : integer := 8;
+  constant c_wbs_data_width    : integer := 64;
+  constant c_wbs_tgd_width     : natural := 64;
 
   subtype t_wbs_address is
     std_logic_vector(c_wbs_address_width-1 downto 0);
+
   subtype t_wbs_data is
     std_logic_vector(c_wbs_data_width-1 downto 0);
-  subtype t_wbs_byte_select is
-    std_logic_vector((c_wbs_data_width/8)-1 downto 0);
 
-  constant c_WBS_DATA   : unsigned(c_wbs_address_width-1 downto 0) := to_unsigned(0, c_wbs_address_width);
-  constant c_WBS_OOB    : unsigned(c_wbs_address_width-1 downto 0) := to_unsigned(1, c_wbs_address_width);
+  subtype t_wbs_tgd is
+    std_logic_vector(c_wbs_tgd_width-1 downto 0);
+
+  constant c_WBS_DATA : unsigned(c_wbs_address_width-1 downto 0) := to_unsigned(0, c_wbs_address_width);
+
+--  constant c_WBS_OOB : unsigned(c_wbs_address_width-1 downto 0) := to_unsigned(1, c_wbs_address_width); 
+
   constant c_WBS_STATUS : unsigned(c_wbs_address_width-1 downto 0) := to_unsigned(2, c_wbs_address_width);
-  constant c_WBS_USER   : unsigned(c_wbs_address_width-1 downto 0) := to_unsigned(3, c_wbs_address_width);
+
+  constant c_WBS_USER : unsigned(c_wbs_address_width-1 downto 0) := to_unsigned(3, c_wbs_address_width);
+
+  constant c_TGD_ERROR_BIT : natural := 0;
 
   --constant c_WRF_OOB_TYPE_RX : std_logic_vector(3 downto 0) := "0000";
   --constant c_WRF_OOB_TYPE_TX : std_logic_vector(3 downto 0) := "0001";
@@ -64,10 +72,9 @@ package wb_stream_pkg is
   type t_wbs_source_out is record
     adr : t_wbs_address;
     dat : t_wbs_data;
+    tgd : t_wbs_tgd;
     cyc : std_logic;
     stb : std_logic;
-    we  : std_logic;
-    sel : t_wbs_byte_select;
   end record;
 
   subtype t_wbs_sink_in is t_wbs_source_out;
@@ -75,8 +82,6 @@ package wb_stream_pkg is
   type t_wbs_source_in is record
     ack   : std_logic;
     stall : std_logic;
-    err   : std_logic;
-    rty   : std_logic;
   end record;
 
   subtype t_wbs_sink_out is t_wbs_source_in;
@@ -105,55 +110,55 @@ package wb_stream_pkg is
     (others => 'X');
   constant cc_dummy_wbs_dat : std_logic_vector(c_wbs_data_width-1 downto 0) :=
     (others => 'X');
-  constant cc_dummy_wbs_sel : std_logic_vector(c_wbs_data_width/8-1 downto 0) :=
+  constant cc_dummy_wbs_tgd : std_logic_vector(c_wbs_tgd_width-1 downto 0):=
     (others => 'X');
 
-  constant cc_dummy_src_in : t_wbs_source_in :=
-    ('0', '0', '0', '0');
+  
+  constant cc_dummy_src_in : t_wbs_source_in := ('0', '0');
+
   constant cc_dummy_snk_in : t_wbs_sink_in :=
-    (cc_dummy_wbs_addr, cc_dummy_wbs_dat, '0', '0', '0', cc_dummy_wbs_sel);
+    (cc_dummy_wbs_addr, cc_dummy_wbs_dat, cc_dummy_wbs_tgd, '0', '0');
 
   -- Components
   component xwb_stream_source
-  port (
-    clk_i                                   : in std_logic;
-    rst_n_i                                 : in std_logic;
+    port (
+      clk_i   : in std_logic;
+      rst_n_i : in std_logic;
 
-    -- Wishbone Fabric Interface I/O
-    src_i                                   : in  t_wbs_source_in;
-    src_o                                   : out t_wbs_source_out;
+      -- Wishbone Fabric Interface I/O
+      src_i : in  t_wbs_source_in;
+      src_o : out t_wbs_source_out;
 
-    -- Decoded & buffered logic
-    addr_i                                  : in  std_logic_vector(c_wbs_address_width-1 downto 0);
-    data_i                                  : in  std_logic_vector(c_wbs_data_width-1 downto 0);
-    dvalid_i                                : in  std_logic;
-    sof_i                                   : in  std_logic;
-    eof_i                                   : in  std_logic;
-    error_i                                 : in  std_logic;
-    bytesel_i                               : in  std_logic_vector((c_wbs_data_width/8)-1 downto 0);
-    dreq_o                                  : out std_logic
-  );
+      -- Decoded & buffered logic
+      addr_i   : in  std_logic_vector(c_wbs_address_width-1 downto 0);
+      data_i   : in  std_logic_vector(c_wbs_data_width-1 downto 0);
+      dvalid_i : in  std_logic;
+      sof_i    : in  std_logic;
+      eof_i    : in  std_logic;
+      error_i  : in  std_logic;
+      dreq_o   : out std_logic
+      );
   end component;
 
   component xwb_stream_sink
-  port (
-    clk_i                                   : in std_logic;
-    rst_n_i                                 : in std_logic;
+    port (
+      clk_i   : in std_logic;
+      rst_n_i : in std_logic;
 
-    -- Wishbone Fabric Interface I/O
-    snk_i                                   : in  t_wbs_sink_in;
-    snk_o                                   : out t_wbs_sink_out;
+      -- Wishbone Fabric Interface I/O
+      snk_i : in  t_wbs_sink_in;
+      snk_o : out t_wbs_sink_out;
 
-    -- Decoded & buffered fabric
-    addr_o                                  : out std_logic_vector(c_wbs_address_width-1 downto 0);
-    data_o                                  : out std_logic_vector(c_wbs_data_width-1 downto 0);
-    dvalid_o                                : out std_logic;
-    sof_o                                   : out std_logic;
-    eof_o                                   : out std_logic;
-    error_o                                 : out std_logic;
-    bytesel_o                               : out std_logic_vector((c_wbs_data_width/8)-1 downto 0);
-    dreq_i                                  : in  std_logic
-  );
+      -- Decoded & buffered fabric
+      addr_o    : out std_logic_vector(c_wbs_address_width-1 downto 0);
+      data_o    : out std_logic_vector(c_wbs_data_width-1 downto 0);
+      dvalid_o  : out std_logic;
+      sof_o     : out std_logic;
+      eof_o     : out std_logic;
+      error_o   : out std_logic;
+      bytesel_o : out std_logic_vector((c_wbs_data_width/8)-1 downto 0);
+      dreq_i    : in  std_logic
+      );
   end component;
 
 end wb_stream_pkg;
