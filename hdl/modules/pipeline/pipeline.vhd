@@ -6,7 +6,7 @@
 -- Author     : aylons  <aylons@LNLS190>
 -- Company    : 
 -- Created    : 2014-06-10
--- Last update: 2014-06-18
+-- Last update: 2014-09-29
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -46,7 +46,7 @@ end entity pipeline;
 
 architecture str of pipeline is
   type slv_array is array(g_depth-1 downto 0) of std_logic_vector(g_width-1 downto 0);
-  signal pipe : slv_array;
+  signal pipe : slv_array := (others => (others => '0'));
 
 begin  -- architecture str
 
@@ -55,9 +55,7 @@ begin  -- architecture str
 
     if rising_edge(clk_i) then
       if ce_i = '1' then
-
         pipe(0) <= data_i;
-
         for n in 1 to g_depth-1 loop
           pipe(n) <= pipe(n-1);
         end loop;
