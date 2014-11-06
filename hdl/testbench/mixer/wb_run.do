@@ -4,7 +4,7 @@ vcom mixer_wb_tb.vhd
 vsim -l output.log -t 1ps -L unisim work.mixer_wb_tb -voptargs="+acc"
 set StdArithNoWarnings 1
 set NumericStdNoWarnings 1
-do wave.do
+do wb_wave.do
 -- do wave_compl.do
 radix -hexadecimal
 -- run 250us

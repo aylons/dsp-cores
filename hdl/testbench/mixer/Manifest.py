@@ -4,4 +4,4 @@ syn_device = "xc6vlx240t"
 
 modules = {"local" : ["../../"]}
 
-files = ["mixer_bench.vhd"]
+files = ["mixer_wb_tb.vhd"]
