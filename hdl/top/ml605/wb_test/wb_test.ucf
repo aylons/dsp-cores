@@ -1,0 +1,2 @@
+NET "sys_clk_p_i" TNM_NET = sys_clk_p_i;
+TIMESPEC TS_sys_clk_p_i = PERIOD "sys_clk_p_i" 300 MHz HIGH 50% INPUT_JITTER 50 ps;
