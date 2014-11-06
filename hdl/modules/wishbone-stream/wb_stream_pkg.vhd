@@ -6,7 +6,7 @@
 -- Author     : aylons  <aylons@LNLS190>
 -- Company    : 
 -- Created    : 2014-08-12
--- Last update: 2014-08-19
+-- Last update: 2014-09-11
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -35,8 +35,8 @@ package wb_stream_pkg is
   -- connection will be determined by the actual interface components, in
   -- their generics.
   constant c_wbs_address_width : integer := 8;
-  constant c_wbs_data_width    : integer := 64;
-  constant c_wbs_tgd_width     : natural := 64;
+  constant c_wbs_data_width    : integer := 128;
+  constant c_wbs_tgd_width     : natural := 128;
 
   subtype t_wbs_address is
     std_logic_vector(c_wbs_address_width-1 downto 0);

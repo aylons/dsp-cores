@@ -6,7 +6,7 @@
 -- Author     : aylons  <aylons@LNLS190>
 -- Company    : 
 -- Created    : 2014-08-12
--- Last update: 2014-09-02
+-- Last update: 2014-09-18
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -90,7 +90,7 @@ architecture rtl of xwb_stream_source is
   signal post_adr  : std_logic_vector(g_addr_width-1 downto 0);
   signal post_tgd  : std_logic_vector(g_tgd_width-1 downto 0);
 
-  signal cyc_int    : std_logic;
+  signal cyc_int : std_logic;
 
 begin  -- rtl
 
@@ -103,6 +103,8 @@ begin  -- rtl
   pre_tgd  <= tgd_i(g_tgd_width-1 downto 1) & (tgd_i(0) or error_i);
 
   fin <= pre_tgd & pre_addr & pre_data;
+
+  rd <= not src_i.stall;
 
   cmp_fifo : generic_shiftreg_fifo
     generic map (
@@ -127,7 +129,6 @@ begin  -- rtl
   -- high-speed DSP streams, we decided to employ the technique Billauer
   -- describes at http://billauer.co.il/reg_fifo.html.
 
-  rd                 <= not src_i.stall;
   will_update_out    <= (rd or not(out_valid)) and (q_valid or middle_valid);
   will_update_middle <= q_valid and out_valid and not(rd) and not(middle_valid);
   fifo_rd            <= q_valid and (rd_cont or not(out_valid) or not(middle_valid));
@@ -142,10 +143,13 @@ begin  -- rtl
         out_valid    <= '0';
         rd_cont      <= '0';
       else
+        -- delayed read
 
         if (rd xor rd_d0) = '1' then
           rd_cont <= rd;
         end if;
+        rd_d0 <= rd;
+
 
         if will_update_middle = '1' then
           reg_middle <= fout;
