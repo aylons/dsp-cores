@@ -30,7 +30,7 @@ module cic_decim
    reg [DATAIN_WIDTH+bitgrowth-1:0]  diffdelay [0:N-1][0:M-1];
    reg [DATAIN_WIDTH+bitgrowth-1:0]  pipe [0:N-1];
    reg [DATAIN_WIDTH+bitgrowth-1:0]  sampler =  {{1'b0}};
-   reg 				     val_reg0 =  {{1'b0}};
+   reg 				     val_reg [0:N];
    
    integer 			     i,j;
 
@@ -53,25 +53,29 @@ module cic_decim
    always @(posedge clk_i) begin
       if (rst_i) begin
 	 sampler <= {{1'b0}};
+	 val_reg[N] <= 1'b0;
 	 
 	 for (i=0; i<N; i=i+1) begin
             pipe[i] <= {{1'b0}};
-            
+            val_reg[i] <= 1'b0;
+ 
             for (j=0; j<M; j=j+1)
               diffdelay[i][j] <= {{1'b0}};
 	 end
 	 
-	 val_reg0 <= 1'b0;
+
       end
       else begin 
 	 if (en_i && act_out_i) begin
 	    sampler <= integrator[N-1];
 	    diffdelay[0][0] <= sampler;
+	    val_reg[0] <= {{1'b1}};
 	    
 	    for (j=1; j<M; j=j+1)
               diffdelay[0][j] <= diffdelay[0][j-1];
 	    
 	    pipe[0] <= sampler - diffdelay[0][M-1];
+	    val_reg[1] <= val_reg[0];
 	    
 	    for (i=1; i<N; i=i+1) begin
                diffdelay[i][0] <= pipe[i-1];
@@ -80,15 +84,13 @@ module cic_decim
 		 diffdelay[i][j] <= diffdelay[i][j-1];
 	       
                pipe[i] <= pipe[i-1] - diffdelay[i][M-1];
+	       val_reg[i+1] <= val_reg[i];
 	    end
-	    val_reg0 <= {{1'b1}};
 	 end
-	 else
-	   val_reg0 <= {{1'b0}};
       end
    end
    
    assign data_o = pipe[N-1][DATAIN_WIDTH+bitgrowth-1:DATAIN_WIDTH+bitgrowth-DATAOUT_WIDTH];
-   assign val_o = val_reg0;
+   assign val_o = val_reg[N];
 
 endmodule

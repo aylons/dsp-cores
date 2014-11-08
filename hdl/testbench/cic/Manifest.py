@@ -4,4 +4,4 @@ syn_device = "xc6vlx240t"
 
 modules = {"local" : ["../../", "../../modules/cic/"]}
 
-files = ["cic_bench.vhd"]
+files = ["cic_dual_wb_tb.vhd"]
