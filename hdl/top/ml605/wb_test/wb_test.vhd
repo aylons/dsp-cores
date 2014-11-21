@@ -6,7 +6,7 @@
 -- Author     : aylons  <aylons@LNLS190>
 -- Company    : 
 -- Created    : 2014-09-16
--- Last update: 2014-09-19
+-- Last update: 2014-11-19
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -38,8 +38,8 @@ entity wb_test is
 
     rst_i : in  std_logic;
     ce_i  : in  std_logic;
-    snk_i : in  t_wbs_sink_in;
-    snk_o : out t_wbs_sink_out;
+    snk_i : in  t_wbs_sink_in_array(3 downto 0);
+    snk_o : out t_wbs_sink_out_array(3 downto 0);
     src_i : in  t_wbs_source_in;
     src_o : out t_wbs_source_out
     );
@@ -64,12 +64,13 @@ architecture structural of wb_test is
   signal rst   : std_logic;
   signal ce    : std_logic;
 
-  signal snk_i_middle : t_wbs_sink_in;
-  signal snk_o_middle : t_wbs_sink_out;
+  signal snk_i_middle : t_wbs_sink_in_array(3 downto 0);
+  signal snk_o_middle : t_wbs_sink_out_array(3 downto 0);
 
   signal sys_clk_gen : std_logic;
   signal locked      : std_logic;
 
+  signal j : natural;
 
   component clk_gen is
     port (
@@ -98,43 +99,59 @@ architecture structural of wb_test is
       src_o : out t_wbs_source_out);
   end component cordic_vectoring_wb;
 
+  component wb_mux is
+    generic (
+      g_input_number  : natural;
+      g_dat_width     : natural;
+      g_tgd_width     : natural;
+      g_adr_in_width  : natural;
+      g_input_buffer  : natural;
+      g_output_buffer : natural);
+    port (
+      clk_i : in  std_logic;
+      rst_i : in  std_logic;
+      snk_i : in  t_wbs_sink_in_array(g_input_number-1 downto 0);
+      snk_o : out t_wbs_sink_out_array(g_input_number-1 downto 0);
+      src_i : in  t_wbs_source_in;
+      src_o : out t_wbs_source_out);
+  end component wb_mux;
+  
 begin
 
   clock <= sys_clk_p_i;
 
-  cordic_vectoring_wb_1 : entity work.cordic_vectoring_wb
-    generic map (
-      g_stages        => c_stages,
-      g_width         => c_width,
-      g_simultaneous  => c_simultaneous,
-      g_parallel      => c_parallel,
-      g_tgd_width     => c_tgd_width,
-      g_adr_width     => c_adr_width,
-      g_input_buffer  => c_input_buffer,
-      g_output_buffer => c_output_buffer)
-    port map (
-      clk_i => clock,
-      rst_i => rst_i,
-      ce_i  => ce_i,
-      snk_i => snk_i,
-      snk_o => snk_o,
-      src_i => snk_o_middle,
-      src_o => snk_i_middle);
+  gen_cordic : for j in 3 downto 0 generate
+    cordic_vectoring_wb_1 : entity work.cordic_vectoring_wb
+      generic map (
+        g_stages        => c_stages,
+        g_width         => c_width,
+        g_simultaneous  => c_simultaneous,
+        g_parallel      => c_parallel,
+        g_tgd_width     => c_tgd_width,
+        g_adr_width     => c_adr_width,
+        g_input_buffer  => c_input_buffer,
+        g_output_buffer => c_output_buffer)
+      port map (
+        clk_i => clock,
+        rst_i => rst_i,
+        ce_i  => ce_i,
+        snk_i => snk_i(j),
+        snk_o => snk_o(j),
+        src_i => snk_o_middle(j),
+        src_o => snk_i_middle(j));
+  end generate gen_cordic;
 
-  cordic_vectoring_wb_2 : entity work.cordic_vectoring_wb
+  cmp_wb_mux : wb_mux
     generic map (
-      g_stages        => c_stages,
-      g_width         => c_width,
-      g_simultaneous  => c_simultaneous,
-      g_parallel      => c_parallel,
+      g_input_number  => 4,
+      g_dat_width     => c_width,
       g_tgd_width     => c_tgd_width,
-      g_adr_width     => c_adr_width,
-      g_input_buffer  => c_input_buffer,
-      g_output_buffer => c_output_buffer)
+      g_adr_in_width  => c_adr_width,
+      g_input_buffer  => 1,
+      g_output_buffer => 1)
     port map (
       clk_i => clock,
       rst_i => rst_i,
-      ce_i  => ce_i,
       snk_i => snk_i_middle,
       snk_o => snk_o_middle,
       src_i => src_i,

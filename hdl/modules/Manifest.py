@@ -12,5 +12,6 @@ modules = { "local" : [	"wb_un_cross",
 			"pipeline",
 			"position_nosysgen",
 			"input_gen",
-			"wishbone-stream"
+			"wishbone-stream",
+                        "wb_mux"
                       ] };
