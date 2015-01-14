@@ -6,7 +6,7 @@
 -- Author     : aylons  <aylons@LNLS190>
 -- Company    : 
 -- Created    : 2014-08-12
--- Last update: 2014-09-18
+-- Last update: 2015-01-14
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -187,9 +187,9 @@ begin  -- rtl
 
   src_o.cyc <= out_valid;
   src_o.stb <= out_valid;               -- and post_dvalid;
-  src_o.dat <= std_logic_vector(resize(signed(post_data), c_wbs_data_width));
-  src_o.adr <= std_logic_vector(resize(signed(post_adr), c_wbs_address_width));
-  src_o.tgd <= std_logic_vector(resize(signed(post_tgd), c_wbs_tgd_width));
+  src_o.dat <= (c_wbs_data_width-1 downto g_data_width    => '0') & post_data;
+  src_o.adr <= (c_wbs_address_width-1 downto g_addr_width => '0') & post_adr;
+  src_o.tgd <= (c_wbs_tgd_width-1 downto g_tgd_width      => '0') & post_tgd;
 
 end rtl;
 
