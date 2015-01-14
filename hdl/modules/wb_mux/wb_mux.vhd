@@ -6,7 +6,7 @@
 -- Author     : aylons  <aylons@LNLS190>
 -- Company    : 
 -- Created    : 2014-11-08
--- Last update: 2014-11-19
+-- Last update: 2015-01-13
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -73,6 +73,10 @@ architecture str of wb_mux is
 
   signal data_array : t_payload_array(g_input_number-1 downto 0);
 
+  type t_req_array is array (natural range <>) of std_logic;
+
+  signal dreq : t_req_array(g_input_number-1 downto 0);
+
   --signals for multiplexer
   constant c_new_adr_width : natural := natural(ceil(log2(real(g_input_number))));
   constant c_adr_width     : natural := c_new_adr_width + g_adr_in_width;
@@ -83,8 +87,8 @@ architecture str of wb_mux is
   signal cur_dat   : std_logic_vector(g_dat_width-1 downto 0);
   signal cur_tgd   : std_logic_vector(g_tgd_width-1 downto 0);
   signal cur_valid : std_logic;
+  signal src_req   : std_logic;
 
-  signal src_req : std_logic;
 
   signal rst_n : std_logic;
 
@@ -148,7 +152,7 @@ begin  -- architecture str
         tgd_o    => data_array(j).tgd,
         error_o  => open,
         dvalid_o => data_array(j).valid,
-        dreq_i   => src_req);
+        dreq_i   => dreq(j));
 
   end generate gen_input;
 
@@ -167,7 +171,6 @@ begin  -- architecture str
         else
           cur_slot <= cur_slot + 1;
         end if;
-        
       end if;  --rst
     end if;  --clk
     
@@ -180,6 +183,23 @@ begin  -- architecture str
   cur_dat   <= data_array(cur_slot).dat;
   cur_tgd   <= data_array(cur_slot).tgd;
   cur_valid <= data_array(cur_slot).valid;
+
+  p_req_demux : process(clk_i)
+  begin
+
+--    if rising_edge(clk_i) then
+
+    for j in 0 to g_input_number-1 loop
+      
+      if(j = cur_slot) then
+        dreq(j) <= src_req;
+      else
+        dreq(j) <= '0';
+      end if;
+
+    end loop;
+--    end if;  --rising_edge
+  end process;
 
   cmp_wbs_source : xwb_stream_source
     generic map (

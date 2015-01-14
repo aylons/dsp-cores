@@ -6,7 +6,7 @@
 -- Author     : aylons  <aylons@LNLS190>
 -- Company    : 
 -- Created    : 2014-11-18
--- Last update: 2014-11-19
+-- Last update: 2015-01-13
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -50,11 +50,11 @@ architecture test of wb_mux_tb is
   -- component generics
   constant c_input_number  : natural := 4;
   constant c_dat_width     : natural := 32;
-  constant c_tgd_width     : natural := 4;
+  constant c_tgd_width     : natural := 32;
   constant c_adr_in_width  : natural := 2;
   constant c_adr_out_width : natural := 4;
-  constant c_input_buffer  : natural := 1;
-  constant c_output_buffer : natural := 1;
+  constant c_input_buffer  : natural := 2;
+  constant c_output_buffer : natural := 2;
 
   -- component ports
   signal clock : std_logic;
@@ -78,12 +78,12 @@ architecture test of wb_mux_tb is
       g_input_buffer  : natural;
       g_output_buffer : natural);
     port (
-      clk_i : in std_logic;
-      rst_i : in std_logic;
-      snk_i :    t_wbs_sink_in_array(g_input_number-1 downto 0);
-      snk_o :    t_wbs_sink_out_array(g_input_number-1 downto 0);
-      src_i :    t_wbs_source_in;
-      src_o :    t_wbs_source_out);
+      clk_i : in  std_logic;
+      rst_i : in  std_logic;
+      snk_i : in  t_wbs_sink_in_array(g_input_number-1 downto 0);
+      snk_o : out t_wbs_sink_out_array(g_input_number-1 downto 0);
+      src_i : in  t_wbs_source_in;
+      src_o : out t_wbs_source_out);
   end component wb_mux;
 
 begin  -- architecture test
@@ -173,6 +173,7 @@ begin  -- architecture test
 
         end if;
       end loop;  -- loop j
+
       -- output 
       if (src_o.cyc and src_o.stb) = '1' then
 
