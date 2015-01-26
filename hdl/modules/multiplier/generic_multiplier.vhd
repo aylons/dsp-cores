@@ -6,7 +6,7 @@
 -- Author     : aylons  <aylons@LNLS190>
 -- Company    : 
 -- Created    : 2014-02-25
--- Last update: 2014-11-06
+-- Last update: 2015-01-26
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -87,18 +87,23 @@ begin  -- architecture str
 
         -- If both are signed, there are two signals. Drop the redundancy.
         if g_signed = true then
+          
           product(0) <= std_logic_vector(signed(a) * signed(b));
           for n in 1 to g_levels-1 loop
             product(n) <= product(n-1);
           end loop;
 
           if g_p_width < c_product_width then
+            
             p_o <= product(g_levels-1)(c_product_width-2 downto c_product_width - g_p_width - 1);
           elsif g_p_width = c_product_width then
             p_o <= product(g_levels-1);
+
           else
+            
             p_o(c_product_width-1 downto 0)         <= product(g_levels-1);
-            p_o(g_p_width-1 downto c_product_width) <= (others => product(g_levels)(c_product_width-1));
+            p_o(g_p_width-1 downto c_product_width) <= (others => product(g_levels-1)(c_product_width-1));
+            
           end if;
 
         else
