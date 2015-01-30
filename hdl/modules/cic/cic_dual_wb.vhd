@@ -6,7 +6,7 @@
 -- Author     : aylons  <aylons@LNLS190>
 -- Company    : 
 -- Created    : 2014-11-07
--- Last update: 2014-11-08
+-- Last update: 2015-01-28
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -200,6 +200,7 @@ begin  -- architecture str
   -- this pipeline holds data for decimated samples. The data is captured from
   -- the the last sample before sampling
 
+  ce_strobe <= ce and decimation_strobe;
   cmp_comb_pipe : pipeline
     generic map (
       g_width => g_adr_width + g_tgd_width,
@@ -207,7 +208,7 @@ begin  -- architecture str
     port map (
       data_i => metadata_middle,
       clk_i  => clk_i,
-      ce_i   => decimation_strobe,
+      ce_i   => ce_strobe,
       data_o => metadata_out);
 
   cmp_cic_decim_I : cic_decim
