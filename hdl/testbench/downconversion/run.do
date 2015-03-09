@@ -1,7 +1,7 @@
-vcom downconv_bench.vhd
+vcom downconv_wb_tb.vhd
 -- make -f Makefile
 -- output log file to file "output.log", set siulation resolution to "fs"
-vsim -l output.log -t 1ps -L unisim work.downconv_bench -voptargs="+acc"
+vsim -l output.log -t 1ps -L unisim work.downconv_wb_tb -voptargs="+acc"
 set StdArithNoWarnings 1
 set NumericStdNoWarnings 1
 do wave.do

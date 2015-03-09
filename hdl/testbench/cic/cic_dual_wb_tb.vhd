@@ -6,7 +6,7 @@
 -- Author     : aylons  <aylons@LNLS190>
 -- Company    : 
 -- Created    : 2014-11-07
--- Last update: 2014-11-08
+-- Last update: 2015-02-06
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -51,10 +51,10 @@ architecture test of cic_dual_wb_tb is
   -- component generics
 
   constant c_input_width   : natural := 24;
-  constant c_output_width  : natural := 32;
-  constant c_stages        : natural := 2;
+  constant c_output_width  : natural := 24;
+  constant c_stages        : natural := 1;
   constant c_delay         : natural := 1;
-  constant c_decim_rate    : natural := 1024;
+  constant c_decim_rate    : natural := 1000;
   constant c_tgd_width     : natural := c_input_width+1;
   constant c_adr_width     : natural := 2;
   constant c_input_buffer  : natural := 4;
@@ -157,6 +157,11 @@ begin
 
   WaveGen : process
     variable count : natural := 0;
+
+    file cic_file       : text open read_mode is "cic.samples";
+    variable cur_inline : line;
+    variable datain   : real;
+    variable data_slv : std_logic_vector(c_input_width-1 downto 0);
     --variable
 
     variable count_slv, count_tgd_slv : std_logic_vector(c_input_width-1 downto 0) := (others => '0');
@@ -176,16 +181,24 @@ begin
         count     := count + 1;
         count_slv := std_logic_vector(to_signed(count, c_input_width));
 
-        snk_i.dat(c_wbs_data_width-1 downto c_input_width*2) <= (others => '0');
-        snk_i.dat(c_input_width*2-1 downto c_input_width)    <= count_slv;
-        snk_i.dat(c_input_width-1 downto 0)                  <= count_slv;
+        if not endfile(cic_file) then
+          readline(cic_file, cur_inline);
 
-        snk_i.adr <= (others => '1');
+          read(cur_inline, datain);
+          data_slv := std_logic_vector(to_signed(integer(datain*real(2**(c_input_width-1))), c_input_width));
 
-        snk_i.tgd <= (c_wbs_tgd_width-1 downto c_tgd_width => '0') & count_slv & '0';
+          snk_i.dat(c_wbs_data_width-1 downto c_input_width*2) <= (others => '0');
+          snk_i.dat(c_input_width*2-1 downto c_input_width)    <= data_slv;
+          snk_i.dat(c_input_width-1 downto 0)                  <= data_slv;
 
-        snk_i.stb <= '1';
-        snk_i.cyc <= '1';
+          snk_i.adr <= (others => '0');
+
+          snk_i.tgd <= (c_wbs_tgd_width-1 downto c_tgd_width => '0') & count_slv & '0';
+
+          snk_i.stb <= '1';
+          snk_i.cyc <= '1';
+          
+        end if;  -- endfile
       else
         snk_i.stb <= '0';
         snk_i.cyc <= '0';

@@ -2,8 +2,8 @@
 
 bit_width = 32
 
-freq_den = 203;
-freq_num = 52;
+freq_den = 35;
+freq_num = 8;
 
 sin_filename = 'dds_sin.nif'
 cos_filename = 'dds_cos.nif'

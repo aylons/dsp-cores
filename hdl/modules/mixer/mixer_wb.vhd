@@ -6,7 +6,7 @@
 -- Author     : aylons  <aylons@LNLS190>
 -- Company    : 
 -- Created    : 2014-10-11
--- Last update: 2014-11-06
+-- Last update: 2015-01-22
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -72,7 +72,6 @@ architecture str of mixer_wb is
       g_sin_file         : string;
       g_cos_file         : string;
       g_number_of_points : natural;
-      g_phase_bus_size   : natural;
       g_input_width      : natural;
       g_output_width     : natural;
       g_sine_width       : natural;
@@ -82,7 +81,6 @@ architecture str of mixer_wb is
       clock_i     : in  std_logic;
       ce_i        : in  std_logic;
       signal_i    : in  std_logic_vector(g_input_width-1 downto 0);
-      phase_sel_i : in  std_logic_vector(g_phase_bus_size-1 downto 0);
       I_out       : out std_logic_vector(g_output_width-1 downto 0);
       Q_out       : out std_logic_vector(g_output_width-1 downto 0));
   end component mixer;
@@ -158,7 +156,6 @@ begin  -- architecture str
       g_sin_file         => g_sin_file,
       g_cos_file         => g_cos_file,
       g_number_of_points => g_number_of_points,
-      g_phase_bus_size   => g_phase_bus_size,
       g_input_width      => g_input_width,
       g_output_width     => g_output_width,
       g_sine_width       => g_sine_width,
@@ -168,7 +165,6 @@ begin  -- architecture str
       clock_i     => clk_i,
       ce_i        => ce,
       signal_i    => input_data,
-      phase_sel_i => (others => '0'),
       I_out       => I_out,
       Q_out       => Q_out);
 

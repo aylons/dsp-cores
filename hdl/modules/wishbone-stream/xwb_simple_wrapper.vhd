@@ -6,7 +6,7 @@
 -- Author     : aylons  <aylons@LNLS190>
 -- Company    : 
 -- Created    : 2014-10-08
--- Last update: 2014-11-05
+-- Last update: 2015-02-05
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -68,7 +68,7 @@ end entity xwb_simple_wrapper;
 
 architecture str of xwb_simple_wrapper is
 
-  signal ce : std_logic;
+  signal ce, cei_d0 : std_logic;
 
   signal tgd_sink, tgd_source           : std_logic_vector(g_tgd_width-1 downto 0)                 := (others => '0');
   signal adr_sink, adr_source           : std_logic_vector(g_adr_width-1 downto 0)                 := (others => '0');
@@ -200,13 +200,14 @@ begin
   begin
     if rising_edge(clk_i) then
       if rst_i = '1' then
-        ce <= '0';
+        cei_d0 <= '0';
       else
-        ce <= ce_i and source_req;
+        cei_d0 <= ce_i;
       end if;
     end if;
   end process;
 
+  ce <= cei_d0 and source_req;
   ce_o <= ce;
   
 end architecture str;

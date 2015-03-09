@@ -6,7 +6,7 @@
 -- Author     : Tomasz Wlostowski
 -- Company    : CERN BE-CO-HT
 -- Created    : 2012-01-16
--- Last update: 2014-09-02
+-- Last update: 2015-02-03
 -- Platform   :
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -147,7 +147,7 @@ begin  -- rtl
     end if;
   end process;
 
-  -- Stall in the first cycle of a frame
+  -- Stall if cannot receive any more data
   snk_out.stall <= full;
 
   snk_o <= snk_out;

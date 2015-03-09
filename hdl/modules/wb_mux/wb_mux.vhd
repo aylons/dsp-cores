@@ -6,7 +6,7 @@
 -- Author     : aylons  <aylons@LNLS190>
 -- Company    : 
 -- Created    : 2014-11-08
--- Last update: 2015-01-13
+-- Last update: 2015-02-05
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -164,7 +164,7 @@ begin  -- architecture str
 
       if rst_i = '1' then
         cur_slot <= 0;
-      else
+      elsif src_req = '1' then
 
         if cur_slot = g_input_number-1 then
           cur_slot <= 0;

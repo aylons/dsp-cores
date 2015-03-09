@@ -6,7 +6,7 @@
 -- Author     : aylons  <aylons@LNLS190>
 -- Company    : 
 -- Created    : 2014-11-07
--- Last update: 2015-01-28
+-- Last update: 2015-02-06
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -58,12 +58,12 @@ end entity cic_dual_wb;
 
 architecture str of cic_dual_wb is
 
-  constant c_bit_growth     : natural                                  := integer(ceil(real(g_delay)*log2(real(g_stages)*real(g_decim_rate))));
-  constant c_bus_width      : natural                                  := natural(ceil(log2(real(g_decim_rate+1))));
-  constant c_ratio_slv      : std_logic_vector(c_bus_width-1 downto 0) := std_logic_vector(to_unsigned(g_decim_rate, c_bus_width));
+  constant c_bit_growth : natural                                  := integer(ceil(real(g_delay)*log2(real(g_stages)*real(g_decim_rate))));
+  constant c_bus_width  : natural                                  := natural(ceil(log2(real(g_decim_rate+1))));
+  constant c_ratio_slv  : std_logic_vector(c_bus_width-1 downto 0) := std_logic_vector(to_unsigned(g_decim_rate, c_bus_width));
 
-  constant c_in_data_width  : natural                                  := g_input_width*2;
-  constant c_out_data_width : natural                                  := g_output_width*2;
+  constant c_in_data_width  : natural := g_input_width*2;
+  constant c_out_data_width : natural := g_output_width*2;
 
   signal data_in  : std_logic_vector(c_in_data_width-1 downto 0);
   signal data_out : std_logic_vector(c_out_data_width-1 downto 0);
@@ -73,11 +73,11 @@ architecture str of cic_dual_wb is
 
   signal metadata_in, metadata_middle, metadata_out : std_logic_vector(g_adr_width + g_tgd_width-1 downto 0);
 
-  signal ce, ce_valid, ce_strobe   : std_logic;
-  signal valid_input, valid_output : std_logic;
-  signal source_req                : std_logic;
-  signal decimation_strobe         : std_logic;
-  signal rst_n                     : std_logic;
+  signal ce, ce_valid, ce_strobe, delayed_strobe : std_logic;
+  signal valid_input, valid_output               : std_logic;
+  signal source_req                              : std_logic;
+  signal decimation_strobe                       : std_logic;
+  signal rst_n                                   : std_logic;
 
 
   component cic_decim is
@@ -189,7 +189,7 @@ begin  -- architecture str
   ce_valid <= ce and valid_input;
   cmp_integrator_pipe : pipeline
     generic map (
-      g_width => g_adr_width + g_tgd_width,
+      g_width => g_adr_width + g_tgd_width,  --one extra for decimation strobe
       g_depth => g_stages)
     port map (
       data_i => metadata_in,
@@ -200,7 +200,16 @@ begin  -- architecture str
   -- this pipeline holds data for decimated samples. The data is captured from
   -- the the last sample before sampling
 
-  ce_strobe <= ce and decimation_strobe;
+  cmp_strobe_pipe : pipeline
+    generic map(
+      g_width => 1,
+      g_depth => g_stages)
+    port map(
+      data_i(0) => decimation_strobe,
+      clk_i     => clk_i,
+      ce_i      => ce_valid,
+      data_o(0) => ce_strobe);
+
   cmp_comb_pipe : pipeline
     generic map (
       g_width => g_adr_width + g_tgd_width,
@@ -208,7 +217,7 @@ begin  -- architecture str
     port map (
       data_i => metadata_middle,
       clk_i  => clk_i,
-      ce_i   => ce_strobe,
+      ce_i   => delayed_strobe,
       data_o => metadata_out);
 
   cmp_cic_decim_I : cic_decim
@@ -226,7 +235,7 @@ begin  -- architecture str
       data_i    => I_in,
       data_o    => I_out,
       act_i     => valid_input,
-      act_out_i => decimation_strobe,
+      act_out_i => ce_strobe,
       val_o     => valid_output);
 
 
@@ -245,7 +254,7 @@ begin  -- architecture str
       data_i    => Q_in,
       data_o    => Q_out,
       act_i     => valid_input,
-      act_out_i => decimation_strobe,
+      act_out_i => ce_strobe,
       val_o     => open);
 
 

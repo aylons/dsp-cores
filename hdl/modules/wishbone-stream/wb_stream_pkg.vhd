@@ -6,7 +6,7 @@
 -- Author     : aylons  <aylons@LNLS190>
 -- Company    : 
 -- Created    : 2014-08-12
--- Last update: 2014-09-11
+-- Last update: 2015-01-22
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -161,6 +161,32 @@ package wb_stream_pkg is
       );
   end component;
 
+  component xwb_simple_wrapper is
+    generic (
+      g_input_width   : natural;
+      g_output_width  : natural;
+      g_tgd_width     : natural;
+      g_adr_width     : natural;
+      g_input_buffer  : natural;
+      g_output_buffer : natural;
+      g_simultaneous  : natural);
+    port (
+      clk_i   : in  std_logic;
+      rst_i   : in  std_logic;
+      ce_i    : in  std_logic;
+      snk_i   : in  t_wbs_sink_in;
+      snk_o   : out t_wbs_sink_out;
+      src_i   : in  t_wbs_source_in;
+      src_o   : out t_wbs_source_out;
+      ce_o    : out std_logic;
+      data_o  : out std_logic_vector(g_input_width-1 downto 0);
+      data_i  : in  std_logic_vector(g_output_width-1 downto 0);
+      valid_o : out std_logic;
+      valid_i : in  std_logic;
+      error_o : out std_logic;
+      error_i : in  std_logic);
+  end component xwb_simple_wrapper;
+  
 end wb_stream_pkg;
 
 package body wb_stream_pkg is

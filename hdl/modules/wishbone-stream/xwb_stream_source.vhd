@@ -6,7 +6,7 @@
 -- Author     : aylons  <aylons@LNLS190>
 -- Company    : 
 -- Created    : 2014-08-12
--- Last update: 2015-01-14
+-- Last update: 2015-02-05
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -79,8 +79,8 @@ architecture rtl of xwb_stream_source is
   signal pre_addr : std_logic_vector(g_addr_width-1 downto 0);
   signal pre_tgd  : std_logic_vector(g_tgd_width-1 downto 0);
 
-  signal q_valid, full, we, rd, rd_d0, fifo_rd : std_logic := '0';
-  signal fin, fout, reg_middle, reg_out        : std_logic_vector(c_fifo_width-1 downto 0);
+  signal q_valid, full, almost_full, we, rd, rd_d0, fifo_rd : std_logic := '0';
+  signal fin, fout, reg_middle, reg_out                     : std_logic_vector(c_fifo_width-1 downto 0);
 
   signal rd_cont, will_update_out, will_update_middle : std_logic := '0';
   signal middle_valid, out_valid                      : std_logic := '0';
@@ -94,7 +94,7 @@ architecture rtl of xwb_stream_source is
 
 begin  -- rtl
 
-  dreq_o <= not full;
+  dreq_o <= not(full);
 
   we <= (error_i or dvalid_i) and not(full);
 
@@ -112,14 +112,15 @@ begin  -- rtl
       g_size       => c_fifo_depth
       )
     port map (
-      rst_n_i   => rst_n_i,
-      clk_i     => clk_i,
-      d_i       => fin,
-      we_i      => we,
-      q_o       => fout,
-      rd_i      => rd,
-      full_o    => full,
-      q_valid_o => q_valid
+      rst_n_i       => rst_n_i,
+      clk_i         => clk_i,
+      d_i           => fin,
+      we_i          => we,
+      q_o           => fout,
+      rd_i          => rd,
+      almost_full_o => almost_full,
+      full_o        => full,
+      q_valid_o     => q_valid
       );
 
   -- Below is the ouput logic/registers for the FIFO, inspired by Eli Billauer.

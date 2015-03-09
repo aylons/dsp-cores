@@ -6,7 +6,7 @@
 -- Author     : aylons  <aylons@LNLS190>
 -- Company    : 
 -- Created    : 2014-03-07
--- Last update: 2014-06-20
+-- Last update: 2015-01-22
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -37,7 +37,6 @@ entity fixed_dds is
   generic (
     g_number_of_points : natural := 203;  -- Number of points of sin and cos (each)
     g_output_width     : natural := 16;   -- Output resolution
-    g_phase_bus_size   : natural := 8;  -- Number of selectable phases, max 256
     g_sin_file         : string  := "./dds_sin.ram";  -- Files with points data
     g_cos_file         : string  := "./dds_cos.ram"
     );
@@ -45,7 +44,6 @@ entity fixed_dds is
     clock_i     : in  std_logic;
     ce_i        : in  std_logic;
     reset_i     : in  std_logic;
-    phase_sel_i : in  std_logic_vector(g_phase_bus_size-1 downto 0);
     sin_o       : out std_logic_vector(g_output_width-1 downto 0);
     cos_o       : out std_logic_vector(g_output_width-1 downto 0)
     );
@@ -56,7 +54,7 @@ end entity fixed_dds;
 
 architecture str of fixed_dds is
 
-  constant c_bus_size     : natural := f_log2_size(g_number_of_points)+g_phase_bus_size;
+  constant c_bus_size     : natural := f_log2_size(g_number_of_points);
   signal cur_address      : std_logic_vector(c_bus_size-1 downto 0);
   signal reset_n          : std_logic;
   signal cos_reg, sin_reg : std_logic_vector(g_output_width-1 downto 0);
@@ -109,14 +107,14 @@ begin  -- architecture str
 
   cmp_lut_sweep : lut_sweep
     generic map (
-      g_phase_bus_size   => g_phase_bus_size,
+      g_phase_bus_size   => 0,
       g_number_of_points => g_number_of_points,
       g_bus_size         => c_bus_size)
     port map (
       reset_i     => reset_i,
       clock_i     => clock_i,
       ce_i        => ce_i,
-      phase_sel_i => phase_sel_i,
+      phase_sel_i => (others => '0'),
       address_o   => cur_address);
 
   reset_n <= not(reset_i);
@@ -124,7 +122,7 @@ begin  -- architecture str
   cmp_sin_lut : generic_simple_dpram
     generic map (
       g_data_width               => g_output_width,
-      g_size                     => g_number_of_points*(2**g_phase_bus_size),
+      g_size                     => g_number_of_points,
       g_with_byte_enable         => false,
       g_addr_conflict_resolution => "dont_care",
       g_init_file                => g_sin_file,
@@ -145,7 +143,7 @@ begin  -- architecture str
   cmp_cos_lut : generic_simple_dpram
     generic map (
       g_data_width               => g_output_width,
-      g_size                     => g_number_of_points*(2**g_phase_bus_size),
+      g_size                     => g_number_of_points,
       g_with_byte_enable         => false,
       g_addr_conflict_resolution => "dont_care",
       g_init_file                => g_cos_file,
